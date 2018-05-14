@@ -18,5 +18,5 @@
     end
     lmdaui = vindui_s[3]/(Ω*R) # 收敛前飞均匀诱导速度系数
 
-	return vindui_s,lmdaui
+	return lmdaui, vall_s
 end
