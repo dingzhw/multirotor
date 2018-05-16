@@ -1,8 +1,7 @@
-# The aerodynamics force of blade elements
+# The aerodynamics force of rotor
 
-@everywhere function beaero(vall_r, chord, α, β, θ, dr,
-                            fcl::Function, fcd::Function)
-
+@everywhere function beaero(vall_r, chord, α, β, θ, dr)
+    # 叶素气动力
     vall_be = rotobe(vall_r, β, θ) # 将速度从旋转坐标系转换到叶素当地坐标系
     if vall_be[2]>=0 # blade elements local lift unit vector
         if fcl(α)>=0.0
@@ -30,14 +29,14 @@
     return fy_be, fz_be
 end
 
-@everywhere function bladeaero()
+@everywhere function bladeaero(vall_r, chord, α, β, ddβ, θ, dr)
     fy_blade = 0.0
     fz_blade = 0.0
     Mβ       = 0.0
     MQ       = 0.0
 
     for i in 1:Nbe
-        fbe = beaero()
+        fbe = beaero(vall_r, chord, α, β, θ, dr[i])
         fy_blade += fbe[1]
         fz_blade += fbe[2]
         MQ       += fbe[1]*rb[i]
@@ -48,13 +47,13 @@ end
     return fy_blade, fz_blade, MQ, Mβ
 end
 
-@everywhere function rotoraero()
+@everywhere function rotoraero(vall_r, chord, α, β, ddβ, θ, dr)
     # summary all the force from all blades
     fy_r = 0.0
     fz_r = 0.0
     MQ   = 0.0
     for k in 1:Nb
-        fblade = bladeaero()
+        fblade = bladeaero(vall_r, chord, α, β, ddβ, θ, dr)
         fy_r += fblade[1]
         fz_r += fblade[2]
         MQ   += fblade[3]
