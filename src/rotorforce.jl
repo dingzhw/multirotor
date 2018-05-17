@@ -29,38 +29,48 @@
     return fy_be, fz_be
 end
 
-@everywhere function bladeaero(vall_r, chord, α, β, ddβ, θ, dr)
+@everywhere function bladeaero(vall_r, chord, α, β, ddβ, θ, dr, rb, k=1)
     fy_blade = 0.0
     fz_blade = 0.0
     Mβ       = 0.0
     MQ       = 0.0
 
-    for i in 1:Nbe
-        fbe = beaero(vall_r, chord, α, β, θ, dr[i])
+    for j in 1:Nbe
+        fbe = beaero(vall_r[k,j], chord, α, β, θ, dr[j])
         fy_blade += fbe[1]
         fz_blade += fbe[2]
-        MQ       += fbe[1]*rb[i]
-        Mβ       += (m_*g*dr*(rb[i]-eflap)*cos(β)+m_*dr*ddβ*(rb[i]-eflap)^2+
-                     m_*dr*Ω^2*(rb[i]-eflap)*cos(β)*(rb[i]-eflap)*sin(β)-
-                     fbe[2]*dr*(rb[i]-eflap))
+        MQ       += fbe[1]*rb[j]
+        Mβ       += (m_*g*dr[j]*(rb[j]-eflap)*cos(β)+m_*dr[j]*ddβ*(rb[j]-eflap)^2+
+                     m_*dr[j]*Ω^2*(rb[j]-eflap)*cos(β)*(rb[j]-eflap)*sin(β)-
+                     fbe[2]*dr[j]*(rb[j]-eflap))
     end
     return fy_blade, fz_blade, MQ, Mβ
 end
 
-@everywhere function rotoraero(vall_r, chord, α, β, ddβ, θ, dr)
+@everywhere function rotoraero(vall_s, chord, α, β, ddβ, θ, dr, rb)
     # summary all the force from all blades
     fy_r = 0.0
     fz_r = 0.0
     MQ   = 0.0
-    for k in 1:Nb
-        fblade = bladeaero(vall_r, chord, α, β, ddβ, θ, dr)
-        fy_r += fblade[1]
-        fz_r += fblade[2]
-        MQ   += fblade[3]
+
+    for i in 1:npsi
+        ψ = dψ*i+2*π/Nb*(k-1)
+        vall_r = vallr(vall_s, ψ)
+        for k in 1:Nb
+            fblade = bladeaero(vall_r, chord, α, β, ddβ, θ, dr, k)
+            fy_r += fblade[1]
+            fz_r += fblade[2]
+            MQ   += fblade[3]
+        end
     end
+
+    fy_r = fy_r/npsi
+    fz_r = fz_r/npsi
+    MQ   = MQ/npsi
+    power = MQ*Ω
 
     fx_s = -fy_r*sin(ψ)
     fy_s = fy_r*cos(ψ)
     fz_s = fz_r
-    return fx_s, fy_s, fz_s, mx, my, mz, MQ, power
+    return fx_s, fy_s, fz_s, mx, my, MQ, power
 end

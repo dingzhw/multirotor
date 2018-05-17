@@ -28,7 +28,6 @@ end
     uitmp = uniforminflow(T)
     λind = uitmp[1]
     vall_s = uitmp[2]
-    vall_r = systoro(vall_s, ψ)
 
     θ0 = the0(θcp, twsitr)
     θ  = theget(ψ, θ_lat, θ_lon)
@@ -38,4 +37,5 @@ end
     cl = clcdtmp[1]
     cd = clcdtmp[2]
 
-    rftmp = rotoraero(vall_r, chord, α, β, ddβ, θ, dr)
+    rftmp = rotoraero(vall_s, chord, α, β, ddβ, θ, dr, rb)
+    betatmp = bladeflap(β, dβ, ddβ, vall_s, chord, α, θ, dr)

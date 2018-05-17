@@ -20,3 +20,12 @@
 
 	return lmdaui, vall_s
 end
+
+@everywhere function vallr(vall_s, ψ)
+    for k in 1:Nb # 叶素当地来流速度（包含诱导速度、前方来流、挥舞流动以及旋转来流）
+        for i in 1:Nbe
+            vall_r[k,i] = systoro(vall_s, ψ)+[0.0,-Ω*rb[i],0.0]+betatoro([0,0,dβ*rb[i]],β)
+        end
+    end
+    return vall_r
+end

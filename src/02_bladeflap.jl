@@ -1,7 +1,8 @@
 # This script is for blade flap calculation
 # 给出旋翼挥舞模型
 
-@everywhere function bladeflap(β, dβ, ddβ)
+@everywhere function bladeflap(β, dβ, ddβ, vall_s, chord, α, θ, dr, k=1)
+    # 当k只取1的时候，认为所有的桨叶挥舞特性都是一致的
     # Initilize the value of β
 
     # 挥舞迭代计数器
@@ -16,12 +17,13 @@
         end
 
         for i in 2:(npsi+1) # 一周挥舞变化
-            ψ = i*dψ
+            ψ = dψ*i+2*π/Nb*(k-1)
+            vall_r = vallr(vall_s, ψ)
             dβ[i] = dβ[i-1]+ddβ[i-1]*dt
             β[i] = β[i-1]+dβ[i-1]*dt+ddβ[i-1]*dt^2
             ddβ[i] = ddβ[i-1]
             while true
-                Mβ = rotorforce()[5]
+                Mβ = bladeaero(vall_r, chord, α, β, ddβ, θ, dr, k)[4]
                 if abs(Mβ)<1e-3 # 判断挥舞铰处总力矩是否为零
                     break
                 end
@@ -35,5 +37,15 @@
             break
         end
     end
-    return true, β, dβ, ddβ
+
+    # 求出等效的纵横向挥舞角（用于配平）
+    for i in 1:npsi
+        ψ = (i-1)*dψ
+        β1c += β[i]*cos(ψ)
+        β1s += β[i]*sin(ψ)
+    end
+    β1c = β1c*2/npsi
+    β1s = β1s82/npsi
+
+    return true, β, dβ, ddβ, β1c, β1s
 end
