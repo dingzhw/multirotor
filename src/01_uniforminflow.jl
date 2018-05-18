@@ -21,10 +21,13 @@
 	return lmdaui, vall_s
 end
 
-@everywhere function vallr(vall_s, ψ)
+@everywhere function vallr(vall_s, ψ, β, dβ)
+    vall_r = Array{Vector}(Nb,Nbe)
     for k in 1:Nb # 叶素当地来流速度（包含诱导速度、前方来流、挥舞流动以及旋转来流）
+        ψ = ψ+(k-1)*2*π/Nb
         for i in 1:Nbe
-            vall_r[k,i] = systoro(vall_s, ψ)+[0.0,-Ω*rb[i],0.0]+betatoro([0,0,dβ*rb[i]],β)
+            vall_r[k,i] = (systoro(vall_s, ψ)+[0.0,-Ω*rb[k,i],0.0]+
+                            betatoro([0,0,dβ*rb[k,i]],β))
         end
     end
     return vall_r

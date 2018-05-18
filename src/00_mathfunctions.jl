@@ -74,11 +74,11 @@ end
 end
 
 # 矢量夹角函数
-@everywhere function aoaang(vec_,x_=[1.0,0.0]) # 二维坐标系下，任意矢量与轴夹角(-180deg~180deg)
+@everywhere function aoaang(vec_::Array{Float64,1},x_=[1.0,0.0]) # 二维坐标系下，任意矢量与轴夹角(-180deg~180deg)
   if vec_[2]>=x_[2] # 判断矢量与x轴夹角方向
     return acos(dot(vec_,x_)/(norm(vec_)*norm(x_)))
   else
-    return -acos(dot(vec_,x_)/(norm(vec_)*norm(x_)))
+    return 2*π-acos(dot(vec_,x_)/(norm(vec_)*norm(x_)))
   end
 end
 

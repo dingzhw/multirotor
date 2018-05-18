@@ -1,5 +1,4 @@
 # This file defines the const varibles
-# 此处数据来源黄水林博士论文试验部分
 
 const ρ = 1.225 #空气密度 量纲kg*m^-3
 const ν = 1.46e-4 #运动黏性系数 无量纲
@@ -17,7 +16,7 @@ const Ω = 125.66  #旋翼转速 量纲rad/s
 const αs = -0*π/180.0  #旋翼轴倾角  量纲rad
 const Kβ = 0.0  #桨叶根部挥舞弹簧刚度 量纲？？？
 const vair = 0.1 # 来流速度 量纲 m/s
-# const T = 2500 #飞行器重量 (量纲为kg*m*s^-2)
+const T = 500 #飞行器重量 (量纲为kg*m*s^-2)
 const dpsideg = 10.0  # 方位角步进长度（量纲为deg）
 const betap = 0.0/180*π # Precone
 # const βang0 = 0.0/180*π # 挥舞角初值

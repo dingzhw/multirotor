@@ -1,19 +1,19 @@
 # 求解aoa以及对应的cl,cd
-@everywhere function the0(θcp, twistr)
+@everywhere function the0(θcp, twistr, rb)
     θ0 = Array{Float64}(Nb,Nbe)
-    for k in Nb
-        for i in Nbe
+    for k in 1:Nb
+        for i in 1:Nbe
             if rb[i]<=twistr
-                θ[k,i] = θcp[k]+twist1*(rb[k,i]/twistr-1)
+                θ0[k,i] = θcp+twist1*(rb[k,i]/twistr-1)
             else
-                θ[k,i] = θcp[k]+twist2*((rb[k,i]-twistr)/(R-twistr))
+                θ0[k,i] = θcp+twist2*((rb[k,i]-twistr)/(R-twistr))
             end
         end
     end
     return θ0
 end
 
-@everywhere function theget(ψ, θ_lat,θ_lon)
+@everywhere function theget(ψ, θ0, θ_lat,θ_lon)
     θ = Array{Float64}(Nb,Nbe)
     for k in 1:Nb
         ψk = ψ+(k-1)*2*π/Nb
@@ -36,12 +36,12 @@ end
     return α
 end
 
-@everywhere function fcl(α, ma, Re=1e6)
+@everywhere function fcl(α, ma=0.0, Re=1e6)
     cl = 0.65
     return cl
 end
 
-@everywhere function fcd(α, ma, Re=1e6)
+@everywhere function fcd(α, ma=0.0, Re=1e6)
     cd = 0.5
     return cd
 end
@@ -50,7 +50,7 @@ end
     ma = Array{Float64}(Nb,Nbe)
     for k in 1:Nb # 计算叶素微段马赫数
         for i in 1:Nbe
-            [k,i] = norm(vall_r[k,i])/v_sound
+            ma[k,i] = norm(vall_r[k,i])/v_sound
         end
     end
     clift = Array{Float64}(Nb,Nbe)
