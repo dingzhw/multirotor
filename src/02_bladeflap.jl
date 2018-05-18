@@ -11,7 +11,7 @@
     while true
         inum += 1
 
-        if inum>npsi*5
+        if inum>50
             print("挥舞迭代次数过多！失败！")
             return false
         end
@@ -39,6 +39,9 @@
         if rmsβ<1e-2
             break
         end
+		β[1] 	= (β[1]+β[npsi+1])/2
+		dβ[1]	= (dβ[1]+dβ[npsi+1])/2
+		ddβ[1]	= (ddβ[1]+ddβ[npsi+1])/2
     end
 
     # 求出等效的纵横向挥舞角（用于配平）
