@@ -32,8 +32,8 @@ end
     rb = zeros(Nb,Nbe)
     dr = zeros(Nb,Nbe)
     cbe = 0.8
-    β1c = 0.0
-    β1s = 0.0
+    βlon = 0.0
+    βlat = 0.0
 
     for k in 1:Nb
         for i in 1:Nbe
@@ -53,23 +53,24 @@ end
     λind = uitmp[1]
     vall_s = uitmp[2]
 
-    θ0 = the0(θcp, twsitr, rb)
+    θ0 = the0(θcp, twsitr, twist1, twist2, rb)
 
-    betatmp = bladeflap(β, dβ, ddβ, vall_s, chord, θ0, dr)
+    betatmp = bladeflap(β, dβ, ddβ, vall_s, chord, θ0, θ_lat, θ_lon, dr, rb)
     if betatmp[1]
-        β = betatmp[2]
-        dβ = betatmp[3]
-        ddβ = betatmp[4]
-        β1c = betatmp[5]
-        β1s = betatmp[6]
+        β    = betatmp[2]
+        dβ   = betatmp[3]
+        ddβ  = betatmp[4]
+        β0   = betatmp[5]
+        βlon = betatmp[6]
+        βlat = betatmp[7]
     end
 
-    rftmp = rotoraero(vall_s, chord, β, ddβ, θ0, dr, rb)
+    rftmp = rotoraero(vall_s, chord, β, dβ, ddβ, θ0, θ_lat, θ_lon, dr, rb)
     fx_s = rftmp[1]
     fy_s = rftmp[2]
     fz_s = rftmp[3]
     MQ   = rftmp[4]
     power= rftmp[5]
 
-    return fz_s, β1c/π*180, β1s/π*180, fy_s, power
+    return fz_s, β0/π*180, βlon/π*180, βlat/π*180, fy_s, power, λind
 end

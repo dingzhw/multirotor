@@ -21,7 +21,7 @@
 	return lmdaui, vall_s
 end
 
-@everywhere function vallr(vall_s, ψ, β, dβ)
+@everywhere function vallr(vall_s, ψ, β, dβ, rb)
     vall_r = Array{Vector}(Nb,Nbe)
     for k in 1:Nb # 叶素当地来流速度（包含诱导速度、前方来流、挥舞流动以及旋转来流）
         ψ = ψ+(k-1)*2*π/Nb

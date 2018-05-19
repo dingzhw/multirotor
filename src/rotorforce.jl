@@ -43,7 +43,7 @@ end
     return fy_blade, fz_blade, MQ, Mβ
 end
 
-@everywhere function rotoraero(vall_s, chord, β, ddβ, θ0, dr, rb)
+@everywhere function rotoraero(vall_s, chord, β, dβ, ddβ, θ0, θ_lat, θ_lon, dr, rb)
     # summary all the force from all blades
     fy_r = 0.0
     fz_r = 0.0
@@ -56,7 +56,7 @@ end
         for k in 1:Nb
             ψ = dψ*i+2*π/Nb*(k-1)
             vall_r = Array{Vector}(Nb,Nbe)
-            vall_r = vallr(vall_s, ψ, β[k,i], dβ[k,i])
+            vall_r = vallr(vall_s, ψ, β[k,i], dβ[k,i], rb)
             θ  = theget(ψ, θ0, θ_lat, θ_lon)
             α = aoaget(vall_r, β[k,i], θ)
             fblade = bladeaero(vall_r, chord, α, β[k,i], ddβ[k,i], θ, dr, rb, k)

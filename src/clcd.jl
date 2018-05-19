@@ -1,5 +1,5 @@
 # 求解aoa以及对应的cl,cd
-@everywhere function the0(θcp, twistr, rb)
+@everywhere function the0(θcp, twistr, twist1, twist2, rb)
     θ0 = Array{Float64}(Nb,Nbe)
     for k in 1:Nb
         for i in 1:Nbe
@@ -13,7 +13,7 @@
     return θ0
 end
 
-@everywhere function theget(ψ, θ0, θ_lat,θ_lon)
+@everywhere function theget(ψ, θ0, θ_lat, θ_lon)
     θ = Array{Float64}(Nb,Nbe)
     for k in 1:Nb
         ψk = ψ+(k-1)*2*π/Nb
