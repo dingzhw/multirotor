@@ -8,3 +8,5 @@ include(pwd()*"\\src\\solfunction.jl")
 
 # testtmp = solfunc_ui()
 # print(show(testtmp))
+
+z = [6.21474 0.0555232 0.111347 0.142478 0.161982 0.175082 0.184257 0.190825 0.195544 0.198869]

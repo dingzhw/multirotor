@@ -12,9 +12,9 @@ const airfoil = "NACA0015" # Airfoil
 const ecut = 0.122 #桨叶根切比例 无量纲
 const eflap = 0.2*R #桨叶挥舞铰偏置量，量纲m
 const m_ = 4.8125 #桨叶质量密度 量纲kg/m
-const Ω = 125.66  #旋翼转速 量纲rad/s
-const αs = -0*π/180.0  #旋翼轴倾角  量纲rad
-const Kβ = 0.0  #桨叶根部挥舞弹簧刚度 量纲？？？
+const Ω = 167  #旋翼转速 量纲rad/s
+const αs = -0*π/180.0  # 旋翼轴倾角  量纲rad
+const Kβ = 0.0  # 桨叶根部挥舞弹簧刚度 量纲？？？
 const vair = 0.1 # 来流速度 量纲 m/s
 const T = 500 #飞行器重量 (量纲为kg*m*s^-2)
 const dpsideg = 10.0  # 方位角步进长度（量纲为deg）
@@ -38,3 +38,31 @@ const mnonc = ρ*A*Ω^2*R^3 #力矩的无量纲化参数 量纲kg*m^2/s^2
 const dψ = dpsideg*π/180 #方位角步进步长 (量纲为rad)
 const dt = dψ/Ω # 方位角步进时间 （量纲为s）
 const npsi = Int8(360/dpsideg) # 周向分割步数
+
+
+# NACA 0012 airfoil data import and interpolate
+using Interpolations;
+@everywhere function caeroimport(filename=pwd()*"\\input\\naca0012_cl")
+    # 本函数的作用是读取相应的数据文件，并由此生成插值序列
+    cafile = open(filename,"r")
+    calines = readlines(cafile)
+    rownum = length(calines)
+    catmp = Float64[]
+    for i in 1:rownum
+        if calines[i] == ""
+            break
+        end
+        cama = split(calines[i],"\t")
+        for j in 2:length(cama)-1
+            camaf = parse(Float64,cama[j])
+            append!(catmp, camaf)
+        end
+    end
+    colnum = Int64(length(catmp)/rownum)
+    cacof = reshape(catmp, colnum, rownum)
+    caitp = interpolate(cacof, BSpline(Linear()), OnGrid())
+    return caitp
+end
+
+clitp_na12 = caeroimport() # 生成升力系数插值序列
+cditp_na12 = caeroimport(pwd()*"\\input\\naca0012_cd") # 生成阻力系数插值序列

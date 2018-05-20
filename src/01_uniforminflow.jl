@@ -2,7 +2,7 @@
 # 给出均匀入流模型
 
 @everywhere function uniforminflow(T)
-    vind_s = [0.0,0.0,-T/(2*ρ*A*norm(v_air))] # 固定坐标系诱导速度初值
+    vind_s = [0.0,0.0,-sqrt(T/(2*ρ*A))] # 固定坐标系诱导速度初值
     vall_s = v_air + vind_s # 固定坐标系总的滑流速度初值
     # lmdaui = -T/(2*ρ*A*norm(vall_s))/(Ω*R) # 前飞均匀诱导速度系数
     vindui_s = [0.0,0.0,-T/(2*ρ*A*norm(vall_s))]  # 第一步迭代的固定坐标系均匀入流值

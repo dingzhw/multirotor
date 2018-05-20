@@ -59,6 +59,10 @@ end
             vall_r = vallr(vall_s, ψ, β[k,i], dβ[k,i], rb)
             θ  = theget(ψ, θ0, θ_lat, θ_lon)
             α = aoaget(vall_r, β[k,i], θ)
+            print("============\n")
+            print("PSI IS: $(ψ) ;\n Vro is : $(vall_r) ;\n\n Alpha is $(α) ;\n\n
+                    BETA is $(β[k,i]) ;")
+            print("\n============\n")
             fblade = bladeaero(vall_r, chord, α, β[k,i], ddβ[k,i], θ, dr, rb, k)
             fy_r += fblade[1]
             fz_r += fblade[2]
