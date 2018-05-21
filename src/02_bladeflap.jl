@@ -6,7 +6,7 @@
     # Initilize the value of β
 
     for k in 1:Nb
-        # 挥舞迭代计数器
+    # 挥舞迭代计数器
         inum = Int8(0)
 
         while true
@@ -28,27 +28,25 @@
                 β[k,i] = β[k,i-1]+dβ[k,i-1]*dt+ddβ[k,i-1]*dt^2
                 while true
                     Mβ = bladeaero(vall_r, chord, α, β[k,i], ddβ[k,i], θ, dr, rb, k)[4]
-                    if abs(Mβ)<10 # 判断挥舞铰处总力矩是否为零
+                    if abs(Mβ)<1 # 判断挥舞铰处总力矩是否为零
                         break
                     end
                     ddβ[k,i] += -Mβ/Iβ
                 end
             end
 
-            rmsβ = abs(β[1]-β[npsi+1]) #+abs(dβ[1]-dβ[npsi+1])+abs(
-                        # ddβ[1]-ddβ[npsi+1])
+            rmsβ = abs(β[k,1]-β[k,npsi+1]) #+abs(dβ[k,1]-dβ[k,npsi+1])+abs(
+                        # ddβ[k,1]-ddβ[k,npsi+1])
             if rmsβ<1e-2
                 break
             end
-    		β[1] 	= (β[1]+β[npsi+1])/2
-    		dβ[1]	= (dβ[1]+dβ[npsi+1])/2
-    		ddβ[1]	= (ddβ[1]+ddβ[npsi+1])/2
+    		β[k,1] 	= (β[k,1]+β[k,npsi+1])/2
+    		dβ[k,1]	= (dβ[k,1]+dβ[k,npsi+1])/2
+    		ddβ[k,1]	= (ddβ[k,1]+ddβ[k,npsi+1])/2
         end
     end
 
     # 求出等效的纵横向挥舞角（用于配平）
-    βlon = 0.0
-    βlat = 0.0
     β1   = β[1,Int8(1)]
     β2   = β[1,Int8(npsi/4)]
     β3   = β[1,Int8(npsi/2)]
