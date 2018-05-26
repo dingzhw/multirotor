@@ -2,11 +2,21 @@
 # the result of this script should be the induced
 # --- velocity of the whole rotor pane
 
+# using packages
+using Elliptic
+
+# define calculation vars
+const   ϵr = 0.7
+
+
 @everywhere type vortexring1
     # define a TYPE of vortex ring
     # what is confuesd here is that the control points may
     # --- transfer with the local velocity and become sth
     # --- but not a square, should it be handeled like this?
+
+    # vortex strength
+    Γ::Float64
 
     # four control points
     A::Vector
@@ -15,7 +25,7 @@
     D::Vector
 
     # effects
-    P::Vector
+    P::Array{Vector}
     # vind::Vector
 
     # functions
@@ -38,30 +48,37 @@ end
     # calculation of the induced velocity of vortex ring
     # --- in its local coordination and in system coordination
 
-    R   = vr.croc(vr)[2]
-    p   = vr.systovr(vr)
-    pxy = [p[1],p[2]]
-    z   = p[3]
-    r   = norm(pxy)
-    δ   = 0.1*R
+    vind_array = Vector[]
+    for i in 1:length(vr.P)
+        R   = vr.croc(vr)[2]
+        p   = vr.systovr(vr)[i]
+        pxy = [p[1],p[2]]
+        z   = p[3]
+        r   = norm(pxy)
+        δ   = 0.1*R
+        Γ   = vr.Γ
 
-    # r and R is different
-    # should fix r
-    A = (r-R)^2+z^2+δ^2
-    a = sqrt((r+R)^2+z^2+δ^2)
-    m = 4*r*R/a^2
+        # r and R is different
+        # should fix r
+        A = (r-R)^2+z^2+δ^2
+        a = sqrt((r+R)^2+z^2+δ^2)
+        m = 4*r*R/a^2
 
-    ur = Γ/(2*π*a)*z/r*((r^2+R^2+z^2+δ^2)/A*Elliptic.E(m)-Elliptic.K(m))
-    uz = Γ/(2*π*a)*(-(r^2-R^2+z^2+δ^2)/A*Elliptic.E(m)+Elliptic.K(m))
+        ur = Γ/(2*π*a)*z/r*((r^2+R^2+z^2+δ^2)/A*Elliptic.E(m)-Elliptic.K(m))
+        uz = Γ/(2*π*a)*(-(r^2-R^2+z^2+δ^2)/A*Elliptic.E(m)+Elliptic.K(m))
 
-    p_ = pxy/r
-    vind = [ur*p_[1],ur*p_[2],uz]
+        p_ = pxy/r
+        vind = [ur*p_[1],ur*p_[2],uz]
+        push!(vind_array,vind)
+    end
 
-    return vind
+    return vind_array
 end
 
 @everywhere function croc(vr::vortexring1)
     # calculate the center and radius of the circle
+
+
 
     A  = vr.A
     B  = vr.B
@@ -82,13 +99,13 @@ end
     a = vr.A
     b = vr.B
     c = vr.C
-    d = vr.d
+    d = vr.D
 
     ca = a-c
     db = b-d
 
     xvr = ca/norm(ca)
-    yvr = db/nrom(db)
+    yvr = db/norm(db)
     zvr = cross(xvr, yvr)
 
     m = [   xvr[1] xvr[2] xvr[3];
@@ -96,9 +113,13 @@ end
             zvr[1] zvr[2] zvr[3]
             ]
 
-    pvr = m*vr.P
+    pvr_array = Vector[]
+    for i in 1:length(vr.P)
+        pvr = m*vr.P[i]
+        push!(pvr_array,pvr)
+    end
 
-    return pvr
+    return pvr_array
 end
 
 @everywhere function vrtosys(vr::vortexring1)
@@ -107,13 +128,13 @@ end
     a = vr.A
     b = vr.B
     c = vr.C
-    d = vr.d
+    d = vr.D
 
     ca = a-c
     db = b-d
 
     xvr = ca/norm(ca)
-    yvr = db/nrom(db)
+    yvr = db/norm(db)
     zvr = cross(xvr, yvr)
 
     m = [   xvr[1] xvr[2] xvr[3];
@@ -123,7 +144,11 @@ end
 
     mt = inv(m)
     vind = vr.vringvind(vr)
-    vindsys = mt*vind
+    vindsys_array = Vector[]
+    for i in 1:length(vind)
+        vindsys = mt*vind[i]
+        push!(vindsys_array, vindsys)
+    end
 
-    return vindsys
+    return vindsys_array
 end
