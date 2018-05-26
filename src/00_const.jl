@@ -39,7 +39,6 @@ const dψ = dpsideg*π/180 #方位角步进步长 (量纲为rad)
 const dt = dψ/Ω # 方位角步进时间 （量纲为s）
 const npsi = Int8(360/dpsideg) # 周向分割步数
 
-
 # NACA 0012 airfoil data import and interpolate
 using Interpolations;
 @everywhere function caeroimport(filename=pwd()*"\\input\\naca0012_cl")

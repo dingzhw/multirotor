@@ -6,8 +6,30 @@
 using Elliptic
 
 # define calculation vars
-const   ϵr = 0.7
+const ϵr = 0.7
+const A0 = [1.,0.,0]*0.7*R
+const B0 = [0.,1.,0]*0.7*R
+const C0 = [-1,0.,0]*0.7*R
+const D0 = [0.,-1,0]*0.7*R
 
+pdisk = Array{Vector}(npsi,Nbe) # disk control points initilization
+for i in 1:npsi
+    ψ = (i-1)*dψ
+    for j in 1:Nbe
+        pdisk[i,j] = [rb[i]*cos(ψ),rb[i]*sin(ψ),(rb[i]-eflap)*sin(β[i,j])]
+    end
+end
+
+################################################################################
+
+@everywhere function gamget(T, kΓ=1.2, vrnum=4)
+    # Calculation of Γ of vortex ring
+    # Γ of vortex ring is calculate at the instant of its release
+    vad = sqrt(T/(2*ρ*A))
+    kp  = R/(vad+abs(vair))
+    dτ  = kp/vrnum
+    return -4*kΓ*kp*T/(ρ*Vtip*A*σ), dτ
+end
 
 @everywhere type vortexring1
     # define a TYPE of vortex ring
@@ -24,55 +46,15 @@ const   ϵr = 0.7
     C::Vector
     D::Vector
 
-    # effects
-    P::Array{Vector}
-    # vind::Vector
+    # # effects
+    # P::Array{Vector}
+    # # vind::Vector
 
     # functions
     croc::Function
     vrtosys::Function
     systovr::Function
     vringvind::Function
-end
-
-@everywhere function gamget(T, kΓ=1.2, vrnum=4)
-    # Calculation of Γ of vortex ring
-    # Γ of vortex ring is calculate at the instant of its release
-    vad = sqrt(T/(2*ρ*A))
-    kp  = R/(vad+abs(vair))
-    dτ  = kp/vrnum
-    return 4*kΓ*kp*T/(ρ*Vtip*A*σ), dτ
-end
-
-@everywhere function vringvind(vr::vortexring1)
-    # calculation of the induced velocity of vortex ring
-    # --- in its local coordination and in system coordination
-
-    vind_array = Vector[]
-    for i in 1:length(vr.P)
-        R   = vr.croc(vr)[2]
-        p   = vr.systovr(vr)[i]
-        pxy = [p[1],p[2]]
-        z   = p[3]
-        r   = norm(pxy)
-        δ   = 0.1*R
-        Γ   = vr.Γ
-
-        # r and R is different
-        # should fix r
-        A = (r-R)^2+z^2+δ^2
-        a = sqrt((r+R)^2+z^2+δ^2)
-        m = 4*r*R/a^2
-
-        ur = Γ/(2*π*a)*z/r*((r^2+R^2+z^2+δ^2)/A*Elliptic.E(m)-Elliptic.K(m))
-        uz = Γ/(2*π*a)*(-(r^2-R^2+z^2+δ^2)/A*Elliptic.E(m)+Elliptic.K(m))
-
-        p_ = pxy/r
-        vind = [ur*p_[1],ur*p_[2],uz]
-        push!(vind_array,vind)
-    end
-
-    return vind_array
 end
 
 @everywhere function croc(vr::vortexring1)
@@ -93,7 +75,39 @@ end
     return O, R
 end
 
-@everywhere function systovr(vr::vortexring1)
+@everywhere function vringvind(vr::vortexring1,P)
+    # calculation of the induced velocity of vortex ring
+    # --- in its local coordination and in system coordination
+
+    vind_array = Vector[]
+    pvr = vr.systovr(vr,P)
+    for i in 1:length(P)
+        R   = vr.croc(vr)[2]
+        p   = pvr[i]
+        pxy = [p[1],p[2]]
+        z   = p[3]
+        r   = norm(pxy)
+        δ   = 0.1*R # vortex core radius
+        Γ   = vr.Γ
+
+        # r and R is different
+        # should fix r
+        A = (r-R)^2+z^2+δ^2
+        a = sqrt((r+R)^2+z^2+δ^2)
+        m = 4*r*R/a^2
+
+        ur = Γ/(2*π*a)*z/r*((r^2+R^2+z^2+δ^2)/A*Elliptic.E(m)-Elliptic.K(m))
+        uz = Γ/(2*π*a)*(-(r^2-R^2+z^2+δ^2)/A*Elliptic.E(m)+Elliptic.K(m))
+
+        p_ = pxy/r
+        vind = [ur*p_[1],ur*p_[2],uz]
+        push!(vind_array,vind)
+    end
+
+    return vind_array
+end
+
+@everywhere function systovr(vr::vortexring1,P)
     # transfer vector in system coordination to vortex ring local coordination
 
     a = vr.A
@@ -114,15 +128,15 @@ end
             ]
 
     pvr_array = Vector[]
-    for i in 1:length(vr.P)
-        pvr = m*vr.P[i]
+    for i in 1:length(P)
+        pvr = m*P[i]
         push!(pvr_array,pvr)
     end
 
     return pvr_array
 end
 
-@everywhere function vrtosys(vr::vortexring1)
+@everywhere function vrtosys(vr::vortexring1,P)
     # transfer vector in vortex ring coordination to system coordination
 
     a = vr.A
@@ -143,7 +157,7 @@ end
             ]
 
     mt = inv(m)
-    vind = vr.vringvind(vr)
+    vind = vr.vringvind(vr,P)
     vindsys_array = Vector[]
     for i in 1:length(vind)
         vindsys = mt*vind[i]
@@ -151,4 +165,29 @@ end
     end
 
     return vindsys_array
+end
+
+@everywhere function vbe(vind, β, dβ)
+    # calculate the blade elements velocity
+
+    # vinds = reshape(vind, Nbe, npsi)
+    # transpose!(vinds)
+
+    vall_s = Array{Vector}(npsi,Nbe)
+    for i in 1:npsi
+        for j in 1:Nbe
+            vall_s[i,j] = v_air+vinds[i,j]
+        end
+    end
+
+    vbe = Array{Vector}(npsi,Nbe)
+    for i in 1:npsi
+        ψ = (i-1)*dψ
+        for j in 1:Nbe
+            vbe[i,j] = (systoro(vall_s, ψ)+[0.0,-Ω*rb[i],0.0]+
+                            betatoro([0,0,dβ[i]*rb[i]],β[i]))
+        end
+    end
+
+    return vbe, vall_s
 end
