@@ -93,3 +93,20 @@ end
     return dot(a,b)/(norm(a)*norm(b))
   end
 end
+
+# Tensor operation functions
+
+@everywhere function tstrans(ts)
+    row = length(ts[:,1])
+    col = length(ts[1,:])
+
+    tst = Array{Any}(col, row)
+
+    for i in 1:row
+        for j in 1:col
+            tst[j,i] = ts[i,j]
+        end
+    end
+
+    return tst
+end

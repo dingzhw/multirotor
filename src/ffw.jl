@@ -12,14 +12,6 @@ const B0 = [0.,1.,0]*0.7*R
 const C0 = [-1,0.,0]*0.7*R
 const D0 = [0.,-1,0]*0.7*R
 
-pdisk = Array{Vector}(npsi,Nbe) # disk control points initilization
-for i in 1:npsi
-    ψ = (i-1)*dψ
-    for j in 1:Nbe
-        pdisk[i,j] = [rb[i]*cos(ψ),rb[i]*sin(ψ),(rb[i]-eflap)*sin(β[i,j])]
-    end
-end
-
 ################################################################################
 
 @everywhere function gamget(T, kΓ=1.2, vrnum=4)
@@ -167,7 +159,7 @@ end
     return vindsys_array
 end
 
-@everywhere function vbe(vind, β, dβ)
+@everywhere function vbe(vind, β, dβ, rb)
     # calculate the blade elements velocity
 
     # vinds = reshape(vind, Nbe, npsi)
@@ -176,7 +168,7 @@ end
     vall_s = Array{Vector}(npsi,Nbe)
     for i in 1:npsi
         for j in 1:Nbe
-            vall_s[i,j] = v_air+vinds[i,j]
+            vall_s[i,j] = v_air+vind[i,j]
         end
     end
 
@@ -184,8 +176,8 @@ end
     for i in 1:npsi
         ψ = (i-1)*dψ
         for j in 1:Nbe
-            vbe[i,j] = (systoro(vall_s, ψ)+[0.0,-Ω*rb[i],0.0]+
-                            betatoro([0,0,dβ[i]*rb[i]],β[i]))
+            vbe[i,j] = (systoro(vall_s[i,j], ψ)+[0.0,-Ω*rb[j],0.0]+
+                            betatoro([0,0,dβ[i]*rb[j]],β[i]))
         end
     end
 

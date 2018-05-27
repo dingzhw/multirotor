@@ -6,7 +6,7 @@
     # Initilize the value of β
 
     # 挥舞迭代计数器
-    inum = Int8(0)
+    inum = Int64(0)
 
     while true
         inum += 1
@@ -17,15 +17,15 @@
         end
 
         # vber = vbe(vind, β, dβ)
+        θ  = theget(θ0, θ_lat, θ_lon)
+        α  = aoaget(vber, β, θ)
         for i in 2:(npsi+1) # 一周挥舞变化
             ψ = (i-1)*dψ
-            θ  = theget(ψ, θ0, θ_lat, θ_lon)
-            α      = aoaget(vber, β[i-1], θ)
             ddβ[i] = ddβ[i-1]
             dβ[i] = dβ[i-1]+ddβ[i-1]*dt
             β[i] = β[i-1]+dβ[i-1]*dt+ddβ[i-1]*dt^2
             while true
-                Mβ = bladeaero(vbe, chord, α, β[i], ddβ[i], θ, dr, rb)[4]
+                Mβ = bladeaero(vber[i-1,:], chord, α[i-1,:], β[i], ddβ[i], θ[i-1,:], dr, rb)[4]
                 if abs(Mβ)<1 # 判断挥舞铰处总力矩是否为零
                     break
                 end
@@ -33,8 +33,8 @@
             end
         end
 
-        rmsβ = abs(β[1]-β[npsi+1]) +abs(dβ[1]-dβ[npsi+1])+
-                abs(ddβ[1]-ddβ[npsi+1])
+        rmsβ = abs(β[1]-β[npsi+1])# +abs(dβ[1]-dβ[npsi+1])+
+                #abs(ddβ[1]-ddβ[npsi+1])
         if rmsβ<1e-2
             break
         end
@@ -44,10 +44,10 @@
     end
 
     # 求出等效的纵横向挥舞角（用于配平）
-    β1   = β[Int8(1)]
-    β2   = β[Int8(npsi/4)]
-    β3   = β[Int8(npsi/2)]
-    β4   = β[Int8(npsi/4*3)]
+    β1   = β[Int64(1)]
+    β2   = β[Int64(npsi/4)]
+    β3   = β[Int64(npsi/2)]
+    β4   = β[Int64(npsi/4*3)]
     β0   = ((β1+β3)/2+(β2+β4)/2)/2
     βlon = -(β1-β3)/2
     βlat = -(β2-β4)/2

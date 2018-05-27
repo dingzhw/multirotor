@@ -9,7 +9,7 @@
     # θcp = 2.0*π/180
     # θ_lat = 0.0
     # θ_lon = 0.0
-    twsitr = 0.5*R
+    twistr = 0.5*R
     twist1 = 0.0
     twist2 = 0.0
     chord = zeros(Nbe)
@@ -35,6 +35,14 @@
 
     vr = vortexring1[]
     vdiskind = zeros(npsi,Nbe)
+
+    pdisk = Array{Vector}(npsi,Nbe) # disk control points initilization
+    for i in 1:npsi
+        ψ = (i-1)*dψ
+        for j in 1:Nbe
+            pdisk[i,j] = [rb[j]*cos(ψ),rb[j]*sin(ψ),(rb[j]-eflap)*sin(β[i])]
+        end
+    end
     # 变量初始化完成
 
     t = 0
@@ -47,22 +55,23 @@
         p = reshape(pdisk,1,npsi*Nbe)
         vindtmp = vr[i].vrtosys(vr[i], p)
         vind = reshape(vindtmp,Nbe,npsi)
-        transpose!(vind)
+        vind = tstrans(vind)
         vdiskind += vind
     end
 
     # calculate the total velocity distribution in disk
-    vber = vbe(vdiskind, β, dβ)
+    vbertmp = vbe(vdiskind, β, dβ, rb)
+    vber    = vbertmp[1]
 
     # calculate the blade flap
     bftmp = bladeflap(β, dβ, ddβ, vber, chord, θ0, θ_lat, θ_lon, dr, rb)
-    if betatmp[1]   # judge if the flap iteration converaged
-        β    = betatmp[2]
-        dβ   = betatmp[3]
-        ddβ  = betatmp[4]
-        β0   = betatmp[5]
-        βlon = betatmp[6]
-        βlat = betatmp[7]
+    if bftmp[1]   # judge if the flap iteration converaged
+        β    = bftmp[2]
+        dβ   = bftmp[3]
+        ddβ  = bftmp[4]
+        β0   = bftmp[5]
+        βlon = bftmp[6]
+        βlat = bftmp[7]
     end
 
     # calculate force, moment and power
@@ -73,5 +82,5 @@
     MQ   = rftmp[4]
     power= rftmp[5]
 
-    return fz_s, β0/π*180, βlon/π*180, βlat/π*180, fy_s, power, λind
+    return fz_s, β0/π*180, βlon/π*180, βlat/π*180, fy_s, power
 end

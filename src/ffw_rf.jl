@@ -65,13 +65,13 @@ end
         # print("PSI IS: $(ψ) ;\n Vro is : $(vall_r) ;\n\n Alpha is $(α) ;\n\n
         #         BETA is $(β[i]) ;")
         # print("\n============\n")
-        fblade = bladeaero(vber[i,:], chord, α, β[i], ddβ[i], θ[i,:], dr, rb)
+        ψ = (i-1)*dψ
+        fblade = bladeaero(vber[i,:], chord, α[i,:], β[i], ddβ[i], θ[i,:], dr, rb)
         fy_r += fblade[1]
         fz_r += fblade[2]
         fx_s += -fy_r*sin(ψ)
         fy_s += fy_r*cos(ψ)
         MQ   += fblade[3]
-        end
     end
 
     fy_r = fy_r/npsi*Nb

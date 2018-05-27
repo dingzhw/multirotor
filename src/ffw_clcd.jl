@@ -17,7 +17,7 @@
 end
 
 @everywhere function theget(θ0, θ_lat, θ_lon)
-    θ = Array{Float64}(Nb,Nbe)
+    θ = Array{Float64}(npsi,Nbe)
     for i in 1:npsi
         ψ = (i-1)*dψ
         for j in 1:Nbe
