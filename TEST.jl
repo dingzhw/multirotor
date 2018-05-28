@@ -38,4 +38,5 @@ include(pwd()*"//src//ffw_clcd.jl")
 include(pwd()*"//src//ffw_bf.jl")
 include(pwd()*"//src//ffw_rf.jl")
 include(pwd()*"//src//ffw_sl.jl")
+include(pwd()*"//src//ffw_tr.jl")
 # --- the test for ffw is end ---

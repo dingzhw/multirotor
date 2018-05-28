@@ -43,44 +43,92 @@
             pdisk[i,j] = [rb[j]*cos(ψ),rb[j]*sin(ψ),(rb[j]-eflap)*sin(β[i])]
         end
     end
+
+    vindj = Array{Any}(2)
+    Tj    = zeros(2)
+    iternum = 1
+    t = 0.
     # 变量初始化完成
 
-    t = 0
-    ggtmp = gamget(T)
-    Γ = ggtmp[1]
-    dτ = ggtmp[2]
-    push!(vr,vortexring1(Γ,A0,B0,C0,D0,croc,vrtosys,systovr,vringvind))
-    for i in 1:length(vr)
-        # calculate the disk induced velocity distribution
-        p = reshape(pdisk,1,npsi*Nbe)
-        vindtmp = vr[i].vrtosys(vr[i], p)
-        vind = reshape(vindtmp,Nbe,npsi)
-        vind = tstrans(vind)
-        vdiskind += vind
+    while true
+        ggtmp = gamget(T)
+        Γ = ggtmp[1]
+        dτ = ggtmp[2]
+        # new vortex ring generate
+        push!(vr,vortexring1(Γ,A0,B0,C0,D0,croc,vrtosys,systovr,vringvind))
+        # calculate the induced velocity
+        vdiskind = zeros(npsi,Nbe)
+        for i in 1:length(vr)
+            # calculate the disk induced velocity distribution
+            p = reshape(pdisk,1,npsi*Nbe)
+            vindtmp = vr[i].vrtosys(vr[i], p)
+            vind = reshape(vindtmp,npsi,Nbe)
+            # vind = tstrans(vind)
+            vdiskind += vind
+        end
+
+        # record the No. i-1 and i induced velocity for compare
+        if iternum == 1
+            vindj[1] = vdiskind
+            Tj[1]     = T
+        elseif iternum == 2
+            vindj[2] = vdiskind
+            Tj[2]     = T
+        else
+            vindj[1] = vindj[2]
+            Tj[1]     = Tj[2]
+            vindj[2] = vdiskind
+            Tj[2]     = T
+        end
+
+        # judge if the indeuce velocity is trimmed
+        # rmsind = trvind(vindj[1],vindj[2])
+        if iternum>2 && abs(Tj[2]-Tj[1])<=1 #trvind(vindj[1],vindj[2])[1]
+            print("=== Induced Velocity is converaged ===\n")
+            print("=== The Total Power need is $(power)===\n")
+            return fz_s, β0/π*180, βlon/π*180, βlat/π*180, fy_s, power
+            break
+        end
+
+        # calculate the total velocity distribution in disk
+        vbertmp = vbe(vdiskind, β, dβ, rb)
+        vber    = vbertmp[1]
+
+        # calculate the blade flap
+        bftmp = bladeflap(β, dβ, ddβ, vber, chord, θ0, θ_lat, θ_lon, dr, rb)
+        if bftmp[1]   # judge if the flap iteration converaged
+            β    = bftmp[2]
+            dβ   = bftmp[3]
+            ddβ  = bftmp[4]
+            β0   = bftmp[5]
+            βlon = bftmp[6]
+            βlat = bftmp[7]
+        end
+
+        # calculate force, moment and power
+        rftmp = rotoraero(vber, chord, β, dβ, ddβ, θ0, θ_lat, θ_lon, dr, rb)
+        fx_s = rftmp[1]
+        fy_s = rftmp[2]
+        fz_s = rftmp[3]
+        MQ   = rftmp[4]
+        power= rftmp[5]
+
+        # vortex rings move
+        vr = vrdel(vr, cut)
+        vr = vrmove(vr, dτ)
+        vr = vrdel(vr, cut)
+
+        # T change
+        T = fz_s
+        print("=== T is $(fz_s) ===\n")
+        print("=== remain is $(Tj[2]-Tj[1]) ===\n")
+        print("=== No is $(iternum) ===\n\n\n")
+
+        iternum += 1
+        t += dτ
+        # if iternum>100
+        #     return fz_s, β0/π*180, βlon/π*180, βlat/π*180, fy_s, power
+        #     break
+        # end
     end
-
-    # calculate the total velocity distribution in disk
-    vbertmp = vbe(vdiskind, β, dβ, rb)
-    vber    = vbertmp[1]
-
-    # calculate the blade flap
-    bftmp = bladeflap(β, dβ, ddβ, vber, chord, θ0, θ_lat, θ_lon, dr, rb)
-    if bftmp[1]   # judge if the flap iteration converaged
-        β    = bftmp[2]
-        dβ   = bftmp[3]
-        ddβ  = bftmp[4]
-        β0   = bftmp[5]
-        βlon = bftmp[6]
-        βlat = bftmp[7]
-    end
-
-    # calculate force, moment and power
-    rftmp = rotoraero(vber, chord, β, dβ, ddβ, θ0, θ_lat, θ_lon, dr, rb)
-    fx_s = rftmp[1]
-    fy_s = rftmp[2]
-    fz_s = rftmp[3]
-    MQ   = rftmp[4]
-    power= rftmp[5]
-
-    return fz_s, β0/π*180, βlon/π*180, βlat/π*180, fy_s, power
 end

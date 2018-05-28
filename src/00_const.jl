@@ -16,7 +16,7 @@ const Ω = 167  #旋翼转速 量纲rad/s
 const Vtip = Ω*R # blade tip velocity
 const αs = -0*π/180.0  # 旋翼轴倾角  量纲rad
 const Kβ = 0.0  # 桨叶根部挥舞弹簧刚度 量纲？？？
-const vair = 10 # 来流速度 量纲 m/s
+const vair = 10. # 来流速度 量纲 m/s
 const T = 500 #飞行器重量 (量纲为kg*m*s^-2)
 const dpsideg = 10.0  # 方位角步进长度（量纲为deg）
 const betap = 0.0/180*π # Precone
@@ -40,6 +40,7 @@ const mnonc = ρ*A*Ω^2*R^3 #力矩的无量纲化参数 量纲kg*m^2/s^2
 const dψ = dpsideg*π/180 #方位角步进步长 (量纲为rad)
 const dt = dψ/Ω # 方位角步进时间 （量纲为s）
 const npsi = Int64(360/dpsideg) # 周向分割步数
+const cut = 10*R # wake cutoff distance
 
 # NACA 0012 airfoil data import and interpolate
 using Interpolations;

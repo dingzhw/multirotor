@@ -17,10 +17,14 @@ const D0 = [0.,-1,0]*0.7*R
 @everywhere function gamget(T, kΓ=1.2, vrnum=4)
     # Calculation of Γ of vortex ring
     # Γ of vortex ring is calculate at the instant of its release
-    vad = sqrt(T/(2*ρ*A))
+    vad = sqrt(abs(T)/(2*ρ*A))
     kp  = R/(vad+abs(vair))
     dτ  = kp/vrnum
-    return -4*kΓ*kp*T/(ρ*Vtip*A*σ), dτ
+    if T>=0
+        return -4*kΓ*kp*T/(ρ*Vtip*A*σ), dτ
+    else
+        return 4*kΓ*kp*T/(ρ*Vtip*A*σ), dτ
+    end
 end
 
 @everywhere type vortexring1
@@ -106,6 +110,7 @@ end
     b = vr.B
     c = vr.C
     d = vr.D
+    o = vr.croc(vr)[1]
 
     ca = a-c
     db = b-d
@@ -121,7 +126,7 @@ end
 
     pvr_array = Vector[]
     for i in 1:length(P)
-        pvr = m*P[i]
+        pvr = m*P[i]+o
         push!(pvr_array,pvr)
     end
 
@@ -159,6 +164,8 @@ end
     return vindsys_array
 end
 
+# functions that related with voetex ring
+
 @everywhere function vbe(vind, β, dβ, rb)
     # calculate the blade elements velocity
 
@@ -182,4 +189,53 @@ end
     end
 
     return vbe, vall_s
+end
+
+@everywhere function vrmove(vr, dτ)
+    # move the vortex rings with their local velocity
+
+    for i in 1:length(vr)
+        # Initilize the induced velocity of control points
+        vinda = [0.,0.,0.]
+        vindb = [0.,0.,0.]
+        vindc = [0.,0.,0.]
+        vindd = [0.,0.,0.]
+        for j in 1:length(vr)
+            vinda += vr[j].vrtosys(vr[i],[vr[i].A])[1]
+            vindb += vr[j].vrtosys(vr[i],[vr[i].B])[1]
+            vindc += vr[j].vrtosys(vr[i],[vr[i].C])[1]
+            vindd += vr[j].vrtosys(vr[i],[vr[i].D])[1]
+        end
+        da = vinda*dτ
+        db = vindb*dτ
+        dc = vindc*dτ
+        dd = vindd*dτ
+
+        vr[i].A += da
+        vr[i].B += db
+        vr[i].C += dc
+        vr[i].D += dd
+    end
+
+    return vr
+end
+
+@everywhere function vrdel(vr,cut)
+    # delete the vortex rings whose position is out of cutoff range
+
+    icut = 0
+    vrnew = vortexring1[]
+    for i in 1:length(vr)
+        h = norm(vr[i].croc(vr[i])[1])
+        if h <= cut
+            icut = i
+            break
+        end
+    end
+
+    for i in icut:length(vr)
+        push!(vrnew,vr[i])
+    end
+
+    return vrnew
 end
