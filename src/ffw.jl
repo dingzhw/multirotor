@@ -7,10 +7,10 @@ using Elliptic
 
 # define calculation vars
 const ϵr = 0.7
-const A0 = [1.,0.,0]*0.7*R
-const B0 = [0.,1.,0]*0.7*R
-const C0 = [-1,0.,0]*0.7*R
-const D0 = [0.,-1,0]*0.7*R
+const A0 = [1.,0.,0]*ϵr*R
+const B0 = [0.,1.,0]*ϵr*R
+const C0 = [-1,0.,0]*ϵr*R
+const D0 = [0.,-1,0]*ϵr*R
 
 ################################################################################
 
@@ -67,8 +67,8 @@ end
     OB = B-O
     OC = C-O
     OD = D-O
-    R  = 1/(4*ϵr)*(norm(OA)+norm(OB)+norm(OC)+norm(OD))
-    return O, R
+    Rn  = 1/(4*ϵr)*(norm(OA)+norm(OB)+norm(OC)+norm(OD))
+    return O, Rn
 end
 
 @everywhere function vringvind(vr::vortexring1,P)
@@ -78,25 +78,29 @@ end
     vind_array = Vector[]
     pvr = vr.systovr(vr,P)
     for i in 1:length(P)
-        R   = vr.croc(vr)[2]
+        Rn   = vr.croc(vr)[2]
         p   = pvr[i]
         pxy = [p[1],p[2]]
         z   = p[3]
         r   = norm(pxy)
-        δ   = 0.1*R # vortex core radius
+        δ   = 0.1*Rn # vortex core radius
         Γ   = vr.Γ
 
-        # r and R is different
+        # r and Rn is different
         # should fix r
-        A = (r-R)^2+z^2+δ^2
-        a = sqrt((r+R)^2+z^2+δ^2)
-        m = 4*r*R/a^2
+        A = (r-Rn)^2+z^2+δ^2
+        a = sqrt((r+Rn)^2+z^2+δ^2)
+        m = 4*r*Rn/a^2
 
-        ur = Γ/(2*π*a)*z/r*((r^2+R^2+z^2+δ^2)/A*Elliptic.E(m)-Elliptic.K(m))
-        uz = Γ/(2*π*a)*(-(r^2-R^2+z^2+δ^2)/A*Elliptic.E(m)+Elliptic.K(m))
+        ur = Γ/(2*π*a)*z/r*((r^2+Rn^2+z^2+δ^2)/A*Elliptic.E(m)-Elliptic.K(m))
+        uz = Γ/(2*π*a)*(-(r^2-Rn^2+z^2+δ^2)/A*Elliptic.E(m)+Elliptic.K(m))
 
         p_ = pxy/r
-        vind = [ur*p_[1],ur*p_[2],uz]
+        if abs(r)<1e-3
+            vind = [0.,0.,uz]
+        else
+            vind = [ur*p_[1],ur*p_[2],uz]
+        end
         push!(vind_array,vind)
     end
 
