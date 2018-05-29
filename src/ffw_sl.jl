@@ -11,7 +11,7 @@
     # θ_lon = 0.0
     T0 = T
     twistr = 0.8*R
-    twist1 = -12.0*π/180
+    twist1 = -0.0*π/180
     twist2 = 0.0
     chord = zeros(Nbe)
     rb = zeros(Nbe) # position of blade control points

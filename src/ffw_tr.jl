@@ -44,9 +44,20 @@ end
         else
             mat = trfunc(θcp, θ_lat, θ_lon, solf)
             optmp = inv(mat)*res
+
+            # ensure all the control varibles are less than 90°
             θcp += optmp[1]
+            if abs(θcp) >= π/2
+                θcp = -π/2+π*rand()
+            end
             θ_lat += optmp[2]
+            if abs(θ_lat) >= π/2
+                θ_lat = -π/2+π*rand()
+            end
             θ_lon += optmp[3]
+            if abs(θ_lon) >= π/2
+                θ_lon = -π/2+π*rand()
+            end
 
             itrim += 1
         end
