@@ -2,15 +2,16 @@
 # --- that means in the function we will keep the control input
 # --- and calculate the force, moment, flap angle and so on
 
-@everywhere function sol_ffw(θcp, θ_lat, θ_lon, T)
+@everywhere function sol_ffw(θcp, θ_lat, θ_lon)
     # fast free wake solution function
 
     # 变量初始化
     # θcp = 2.0*π/180
     # θ_lat = 0.0
     # θ_lon = 0.0
-    twistr = 0.5*R
-    twist1 = 0.0
+    T0 = T
+    twistr = 0.8*R
+    twist1 = -12.0*π/180
     twist2 = 0.0
     chord = zeros(Nbe)
     rb = zeros(Nbe) # position of blade control points
@@ -51,7 +52,7 @@
     # 变量初始化完成
 
     while true
-        ggtmp = gamget(T)
+        ggtmp = gamget(T0)
         Γ = ggtmp[1]
         dτ = ggtmp[2]
         # new vortex ring generate
@@ -70,22 +71,23 @@
         # record the No. i-1 and i induced velocity for compare
         if iternum == 1
             vindj[1] = vdiskind
-            Tj[1]     = T
+            Tj[1]     = T0
         elseif iternum == 2
             vindj[2] = vdiskind
-            Tj[2]     = T
+            Tj[2]     = T0
         else
             vindj[1] = vindj[2]
             Tj[1]     = Tj[2]
             vindj[2] = vdiskind
-            Tj[2]     = T
+            Tj[2]     = T0
         end
 
         # judge if the indeuce velocity is trimmed
         # rmsind = trvind(vindj[1],vindj[2])
-        if iternum>2 && abs(Tj[2]-Tj[1])<=1 #trvind(vindj[1],vindj[2])[1]
+        if iternum>2 && abs(Tj[2]-Tj[1])<=0.5 #trvind(vindj[1],vindj[2])[1]
             print("=== Induced Velocity is converaged ===\n")
-            print("=== The Total Power need is $(power)===\n")
+            print("=== Thrust is $(T0) ===\n")
+            # print("=== The Total Power need is $(power)===\n")
             return fz_s, β0/π*180, βlon/π*180, βlat/π*180, fy_s, power
             break
         end
@@ -118,11 +120,11 @@
         vr = vrmove(vr, dτ)
         vr = vrdel(vr, cut)
 
-        # T change
-        T = fz_s
-        print("=== T is $(fz_s) ===\n")
-        print("=== remain is $(Tj[2]-Tj[1]) ===\n")
-        print("=== No is $(iternum) ===\n\n\n")
+        # T0 change
+        T0 = fz_s
+        # print("=== Thrust is $(fz_s) ===\n")
+        # print("=== Remain is $(Tj[2]-Tj[1]) ===\n")
+        # print("=== No is $(iternum) ===\n\n\n")
 
         iternum += 1
         t += dτ

@@ -1,66 +1,23 @@
-ggtmp = gamget(T0)
-Γ = ggtmp[1]
-dτ = ggtmp[2]
-# new vortex ring generate
-push!(vr,vortexring1(Γ,A0,B0,C0,D0,croc,vrtosys,systovr,vringvind))
-# calculate the induced velocity
-vdiskind = zeros(npsi,Nbe)
-for i in 1:length(vr)
-    # calculate the disk induced velocity distribution
-    p = reshape(pdisk,1,npsi*Nbe)
-    vindtmp = vr[i].vrtosys(vr[i], p)
-    vind = reshape(vindtmp,npsi,Nbe)
-    # vind = tstrans(vind)
-    vdiskind += vind
+θcp = 2.0*π/180
+θ_lat = 0.0
+θ_lon = 0.0
+# T0 = T
+twistr = 0.8*R
+twist1 = -12.0*π/180
+twist2 = 0.0
+chord = zeros(Nbe)
+rb = zeros(Nbe) # position of blade control points
+dr = zeros(Nbe) # distance of each two blade control points
+cbe = 0.8   # Range[0,1] for adjust the denisty of rd[] in tip, lager for more dense
+βlon = 0.0
+βlat = 0.0
+
+for i in 1:Nbe
+    chord[i] = chroot*taper*(i-1)/Nbe
+    dr[i] = (R*(1-ecut)*(sin(i/Nbe*cbe*π/2)-
+                sin((i-1)/Nbe*cbe*π/2))/sin(cbe*π/2))
+    rb[i] = (ecut*R+R*(1-ecut)*(sin(i/Nbe*cbe*π/2)+
+                sin((i-1)/Nbe*cbe*π/2))/sin(cbe*π/2)/2)
 end
 
-# record the No. i-1 and i induced velocity for compare
-if iternum == 1
-    vindj[1] = vdiskind
-elseif iternum == 2
-    vindj[2] = vdiskind
-else
-    vindj[1] = vindj[2]
-    vindj[2] = vdiskind
-end
-
-# # judge if the indeuce velocity is trimmed
-# if iternum>1 && trvind(vindj[1],vindj[2])
-#     print("=== Induced Velocity is converaged ===\n")
-#     return fz_s, β0/π*180, βlon/π*180, βlat/π*180, fy_s, power
-#     break
-# end
-
-# calculate the total velocity distribution in disk
-vbertmp = vbe(vdiskind, β, dβ, rb)
-vber    = vbertmp[1]
-
-# calculate the blade flap
-bftmp = bladeflap(β, dβ, ddβ, vber, chord, θ0, θ_lat, θ_lon, dr, rb)
-if bftmp[1]   # judge if the flap iteration converaged
-    β    = bftmp[2]
-    dβ   = bftmp[3]
-    ddβ  = bftmp[4]
-    β0   = bftmp[5]
-    βlon = bftmp[6]
-    βlat = bftmp[7]
-end
-
-# calculate force, moment and power
-rftmp = rotoraero(vber, chord, β, dβ, ddβ, θ0, θ_lat, θ_lon, dr, rb)
-fx_s = rftmp[1]
-fy_s = rftmp[2]
-fz_s = rftmp[3]
-MQ   = rftmp[4]
-power= rftmp[5]
-
-# vortex rings move
-vr = vrmove(vr, dτ)
-
-# T change
-T0 = fz_s
-print("=== T is $(fz_s) ===\n")
-print("=== No is $(iternum) ===\n")
-print("=== vind is $(vdiskind[1]) ===\n\n\n")
-iternum += 1
-t += dτ
+θ0 = the0(θcp, twistr, twist1, twist2, rb)
