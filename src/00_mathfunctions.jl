@@ -15,10 +15,16 @@ end
     return Mrbt
 end
 
-@everywhere function Mbetatothe(θ) # beta to theta
-    Mbthe = [-1 0 0;
-              0 -cos(θ) -sin(θ);
-              0 -sin(θ) cos(θ)]
+@everywhere function Mbetatothe(θ, rotor=1) # beta to theta
+    if rotor == 1
+        Mbthe = [-1 0 0;
+                  0 -cos(θ) -sin(θ);
+                  0 -sin(θ) cos(θ)]
+    else
+        Mbthe = [1 0 0;
+                 0 cos(θ) -sin(θ);
+                 0 sin(θ) cos(θ)]
+    end
     return Mbthe
 end
 
@@ -47,29 +53,29 @@ end
     return mro
 end
 
-@everywhere function betatobe(vec::Array,θ,M=Mbetatothe) # beta to theta
+@everywhere function betatobe(vec::Array, θ, rotor=1, M=Mbetatothe) # beta to theta
     mthe = zeros(Float64,3)
-    mthe = M(θ)*vec
+    mthe = M(θ, rotor)*vec
     return mthe
 end
 
-@everywhere function betobeta(vec::Array, θ, M=Mbetatothe) # theta to beta
+@everywhere function betobeta(vec::Array, θ, rotor=1, M=Mbetatothe) # theta to beta
     mbeta = zeros(Float64,3)
-    mbeta = inv(M(θ))*vec
+    mbeta = inv(M(θ, rotor))*vec
     return mbeta
 end
 
-@everywhere function rotobe(vec::Array, β, θ, M1=Mrtobeta, M2=Mbetatothe)
+@everywhere function rotobe(vec::Array, β, θ, rotor=1, M1=Mrtobeta, M2=Mbetatothe)
     # rotation to theta
     mthe = zeros(Float64,3)
-    mthe = M2(θ)*(M1(β)*vec)
+    mthe = M2(θ, rotor)*(M1(β)*vec)
     return mthe
 end
 
-@everywhere function betoro(vec::Array, β, θ, M1=Mrtobeta, M2=Mbetatothe)
+@everywhere function betoro(vec::Array, β, θ, rotor=1, M1=Mrtobeta, M2=Mbetatothe)
     # theta to rotation
     mro = zeros(Float64,3)
-    mro = inv(M1(β))*(inv(M2(θ))*vec)
+    mro = inv(M1(β))*(inv(M2(θ, rotor))*vec)
     return mro
 end
 

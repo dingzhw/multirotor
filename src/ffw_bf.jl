@@ -1,7 +1,7 @@
 # This script is for blade flap calculation
 # 给出旋翼挥舞模型
 
-@everywhere function bladeflap(β, dβ, ddβ, vber, chord, θ0, θ_lat, θ_lon, dr, rb)
+@everywhere function bladeflap(β, dβ, ddβ, vber, chord, θ0, θ_lat, θ_lon, dr, rb, rotor=1)
     # 当k只取1的时候，认为所有的桨叶挥舞特性都是一致的
     # Initilize the value of β
 
@@ -17,10 +17,10 @@
         end
 
         # vber = vbe(vind, β, dβ)
-        θ  = theget(θ0, θ_lat, θ_lon)
-        α  = aoaget(vber, β, θ)
+        θ  = theget(θ0, θ_lat, θ_lon, rotor)
+        α  = aoaget(vber, β, θ, rotor)
         for i in 2:(npsi+1) # 一周挥舞变化
-            ψ = (i-1)*dψ
+            # ψ = (i-1)*dψ
             ddβ[i] = ddβ[i-1]
             dβ[i] = dβ[i-1]+ddβ[i-1]*dt
             β[i] = β[i-1]+dβ[i-1]*dt+ddβ[i-1]*dt^2

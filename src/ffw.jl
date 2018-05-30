@@ -6,18 +6,22 @@
 using Elliptic
 
 # define calculation vars
-const ϵr = 0.7
-const A0 = [1.,0.,0]*ϵr*R
+const ϵr = 0.7 # the distance from rotor center to control points cycle
+const A0 = [1.,0.,0]*ϵr*R # new released vortex ring control points
 const B0 = [0.,1.,0]*ϵr*R
 const C0 = [-1,0.,0]*ϵr*R
 const D0 = [0.,-1,0]*ϵr*R
+const A01 = A0+[0., disr, hr] # control points of the other tandem rotor
+const B01 = B0+[0., disr, hr]
+const C01 = C0+[0., disr, hr]
+const D01 = D0+[0., disr, hr]
 
 ################################################################################
 
 @everywhere function gamget(T, kΓ=1.2, vrnum=4)
     # Calculation of Γ of vortex ring
     # Γ of vortex ring is calculate at the instant of its release
-    vad = sqrt(abs(T)/(2*ρ*A))
+    vad = sqrt(abs(T)/Nro/(2*ρ*A))
     kp  = R/(vad+abs(vair))
     dτ  = kp/vrnum
     if T>=0
@@ -170,7 +174,7 @@ end
 
 # functions that related with voetex ring
 
-@everywhere function vbe(vind, β, dβ, rb)
+@everywhere function vbe(vind, β, dβ, rb, rotor=1)
     # calculate the blade elements velocity
 
     # vinds = reshape(vind, Nbe, npsi)
@@ -185,9 +189,9 @@ end
 
     vbe = Array{Vector}(npsi,Nbe)
     for i in 1:npsi
-        ψ = (i-1)*dψ
+        ψ = (-1)^(rotor-1)*(i-1)*dψ
         for j in 1:Nbe
-            vbe[i,j] = (systoro(vall_s[i,j], ψ)+[0.0,-Ω*rb[j],0.0]+
+            vbe[i,j] = (systoro(vall_s[i,j], ψ)+[0.0,(-1)^rotor*Ω*rb[j],0.0]+
                             betatoro([0,0,dβ[i]*rb[j]],β[i]))
         end
     end

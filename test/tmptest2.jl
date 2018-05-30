@@ -1,23 +1,45 @@
-θcp = 2.0*π/180
-θ_lat = 0.0
-θ_lon = 0.0
-# T0 = T
-twistr = 0.8*R
-twist1 = -12.0*π/180
-twist2 = 0.0
-chord = zeros(Nbe)
-rb = zeros(Nbe) # position of blade control points
-dr = zeros(Nbe) # distance of each two blade control points
-cbe = 0.8   # Range[0,1] for adjust the denisty of rd[] in tip, lager for more dense
-βlon = 0.0
-βlat = 0.0
-
-for i in 1:Nbe
-    chord[i] = chroot*taper*(i-1)/Nbe
-    dr[i] = (R*(1-ecut)*(sin(i/Nbe*cbe*π/2)-
-                sin((i-1)/Nbe*cbe*π/2))/sin(cbe*π/2))
-    rb[i] = (ecut*R+R*(1-ecut)*(sin(i/Nbe*cbe*π/2)+
-                sin((i-1)/Nbe*cbe*π/2))/sin(cbe*π/2)/2)
+soltmp = solf(θtdm1, θtdm2)
+res    = [T-soltmp[3][1];
+          0.-soltmp[3][2];
+          0.-soltmp[1][3];
+          0.-soltmp[1][4];
+          0.-soltmp[2][3];
+          0.-soltmp[2][4]] # trim values difference
+if itrim%100 == 0 # in order to get rid of too many iteration steps
+    print("Hard to Trim!\n")
+    print("If the calculation shoulbe continue? (Type 'y' or 'n')\n")
+    resp = readline()
+    if resp =="n"
+        print("Trim Failed!\n")
+        # return soltmp, θtdm1, θtdm2
+        # # break
+    end
 end
 
-θ0 = the0(θcp, twistr, twist1, twist2, rb)
+if abs(res[1])<=20 && abs(res[2])<=10 # || mean(abs.(res[3:6]))<=1e-1
+    print("Trim Succeeded!\n")
+    # return soltmp, θtdm1, θtdm2
+    # break
+else
+    mat = trfunc(θtdm1, θtdm2, solf)
+    print("|--------------------------------|\n")
+    print("====== The Jocobi Matrix ======\n")
+    for i in 1:length(mat[:,1])
+        print("$(mat[1,:])\n")
+    end
+    print("|--------------------------------|\n")
+    optmp = inv(mat)*res
+
+    # ensure all the control varibles are less than 90°
+    for i in 1:length(θtdm1)
+        θtdm1[i] += optmp[i]
+        if abs(θtdm1[i])>=π/2
+            θtdm1[i] = -π/2+π*rand()
+        end
+        θtdm2[i] += optmp[i+length(θtdm1)]
+        if abs(θtdm2[i])>=π/2
+            θtdm2[i] = -π/2+π*rand()
+        end
+    end
+    itrim += 1
+end

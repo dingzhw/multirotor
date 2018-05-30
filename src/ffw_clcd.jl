@@ -16,10 +16,10 @@
     return θ0
 end
 
-@everywhere function theget(θ0, θ_lat, θ_lon)
+@everywhere function theget(θ0, θ_lat, θ_lon, rotor=1)
     θ = Array{Float64}(npsi,Nbe)
     for i in 1:npsi
-        ψ = (i-1)*dψ
+        ψ = (-1)^(rotor-1)*(i-1)*dψ
         for j in 1:Nbe
             θ[i,j] = θ0[j]+θ_lat*cos(ψ)+θ_lon*sin(ψ)
         end
@@ -27,14 +27,14 @@ end
     return θ
 end
 
-@everywhere function aoaget(vber, β, θ)
+@everywhere function aoaget(vber, β, θ, rotor=1)
     # 直接在叶素坐标系下通过矢量关系求解气动迎角
     # 并且通过aoaang函数来确保迎角范围为0~360°（见"\\src\\00_mathfunctions.jl"）
     α = Array{Float64}(npsi,Nbe)
 
     for i in 1:npsi
         for j in 1:Nbe
-            windbe = rotobe(vber[i,j], β[i], θ[i,j]) # 叶素坐标系下来流的速度矢量
+            windbe = rotobe(vber[i,j], β[i], θ[i,j], rotor) # 叶素坐标系下来流的速度矢量
             windyz = [windbe[2],windbe[3]]
             α[i,j] = aoaang(windyz)
         end

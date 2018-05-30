@@ -11,13 +11,13 @@ const chroot = 0.065 # 桨根弦长
 const airfoil = "NACA0012" # Airfoil
 const ecut = 0.122 #桨叶根切比例 无量纲
 const eflap = 0.2*R #桨叶挥舞铰偏置量，量纲m
-const m_ = 1.9 #桨叶质量密度 量纲kg/m
+const m_ = 4.9 #桨叶质量密度 量纲kg/m
 const Ω = 220  #旋翼转速 量纲rad/s
 const Vtip = Ω*R # blade tip velocity
 const αs = -0*π/180.0  # 旋翼轴倾角  量纲rad
 const Kβ = 0.0  # 桨叶根部挥舞弹簧刚度 量纲？？？
-const vair = 10.0 # 来流速度 量纲 m/s
-const T = 500 #飞行器重量 (量纲为kg*m*s^-2)
+const vair = 0.0 # 来流速度 量纲 m/s
+const T = 1000 #飞行器重量 (量纲为kg*m*s^-2)
 const dpsideg = 10.0  # 方位角步进长度（量纲为deg）
 const betap = 0.0/180*π # Precone
 # const βang0 = 0.0/180*π # 挥舞角初值
@@ -41,6 +41,8 @@ const dψ = dpsideg*π/180 #方位角步进步长 (量纲为rad)
 const dt = dψ/Ω # 方位角步进时间 （量纲为s）
 const npsi = Int64(360/dpsideg) # 周向分割步数
 const cut = 10*R # wake cutoff distance
+const disr = 1.1*R # the distance between two rotors in Y coordination
+const hr = 0.2*R # the distance between two rotors in Z coordination
 
 # NACA 0012 airfoil data import and interpolate
 using Interpolations;

@@ -1,6 +1,6 @@
 # The aerodynamics force of rotor
 
-@everywhere function beaero(vbe_r, chord, α, β, θ, dr)
+@everywhere function beaero(vbe_r, chord, α, β, θ, dr, rotor=1)
     # 叶素气动力
     # α的范围为0~360°
 
@@ -20,14 +20,14 @@
     # --- as shown above
     lift = lbe*abs(1/2*ρ*norm(vbe_r)^2*chord*fcl(α))
     drag = dbe*abs(1/2*ρ*norm(vbe_r)^2*chord*fcd(α))
-    lift_ro = betoro(lift, β, θ)
-    drag_ro = betoro(drag, β, θ)
+    lift_ro = betoro(lift, β, θ, rotor)
+    drag_ro = betoro(drag, β, θ, rotor)
     fz_be = (lift_ro[3]+drag_ro[3])*dr
     fy_be = (lift_ro[2]+drag_ro[2])*dr
     return fy_be, fz_be
 end
 
-@everywhere function bladeaero(vall_r, chord, α, β, ddβ, θ, dr, rb)
+@everywhere function bladeaero(vall_r, chord, α, β, ddβ, θ, dr, rb, rotor=1)
     # vall_r here is the column value of the total vber ```
 
     fy_blade = 0.0
@@ -36,7 +36,7 @@ end
     MQ       = 0.0
 
     for j in 1:Nbe
-        fbe = beaero(vall_r[j], chord[j], α[j], β, θ[j], dr[j])
+        fbe = beaero(vall_r[j], chord[j], α[j], β, θ[j], dr[j], rotor)
         fy_blade += fbe[1]
         fz_blade += fbe[2]
         MQ       += fbe[1]*rb[j]
@@ -48,7 +48,7 @@ end
     return fy_blade, fz_blade, MQ, Mβ
 end
 
-@everywhere function rotoraero(vber, chord, β, dβ, ddβ, θ0, θ_lat, θ_lon, dr, rb)
+@everywhere function rotoraero(vber, chord, β, dβ, ddβ, θ0, θ_lat, θ_lon, dr, rb, rotor=1)
     # summary all the force from all blades
     fy_r = 0.0
     fz_r = 0.0
@@ -58,15 +58,15 @@ end
     MQ   = 0.0
 
     # vber = vbe(vind, β, dβ)
-    θ  = theget(θ0, θ_lat, θ_lon)
-    α = aoaget(vber, β, θ)
+    θ  = theget(θ0, θ_lat, θ_lon, rotor)
+    α = aoaget(vber, β, θ, rotor)
     for i in 1:npsi
         # print("============\n")
         # print("PSI IS: $(ψ) ;\n Vro is : $(vall_r) ;\n\n Alpha is $(α) ;\n\n
         #         BETA is $(β[i]) ;")
         # print("\n============\n")
-        ψ = (i-1)*dψ
-        fblade = bladeaero(vber[i,:], chord, α[i,:], β[i], ddβ[i], θ[i,:], dr, rb)
+        ψ = (-1)^(rotor-1)*(i-1)*dψ
+        fblade = bladeaero(vber[i,:], chord, α[i,:], β[i], ddβ[i], θ[i,:], dr, rb, rotor)
         fy_r += fblade[1]
         fz_r += fblade[2]
         fx_s += -fy_r*sin(ψ)
@@ -77,7 +77,7 @@ end
     fy_r = fy_r/npsi*Nb
     fz_r = fz_r/npsi*Nb
     MQ   = MQ/npsi*Nb
-    power = -MQ*Ω/1e3
+    power = (-1)^rotor*MQ*Ω/1e3
 
     fx_s = fx_s/npsi
     fy_s = fy_s/npsi
