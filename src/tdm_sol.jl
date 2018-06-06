@@ -173,9 +173,9 @@
         T01 = fz_s1
         T02 = fz_s2
         T0 = T01+T02
-        # print("=== Thrust is $(T0) ===\n")
-        # print("=== Remain is $(Tj[2]-Tj[1]) ===\n")
-        # print("=== No is $(iternum) ===\n\n\n")
+        print("=== Thrust is $(T0) ===\n")
+        print("=== Remain is $(Tj[2]-Tj[1]) ===\n")
+        print("=== No is $(iternum) ===\n\n\n")
 
         iternum += 1
         t1 += dτ

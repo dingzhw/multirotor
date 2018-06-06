@@ -41,7 +41,7 @@ const dψ = dpsideg*π/180 #方位角步进步长 (量纲为rad)
 const dt = dψ/Ω # 方位角步进时间 （量纲为s）
 const npsi = Int64(360/dpsideg) # 周向分割步数
 const cut = 10*R # wake cutoff distance
-const disr = 1.1*R # the distance between two rotors in Y coordination
+const disr = 1.3*R # the distance between two rotors in Y coordination
 const hr = 0.2*R # the distance between two rotors in Z coordination
 
 # NACA 0012 airfoil data import and interpolate
