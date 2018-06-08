@@ -27,6 +27,10 @@ end
 
     # functions
     fitness   :: Function
+
+    # judge if the constraint condition is satisfied
+    Creature(vars, fitness) = constraint(vars) ? new(vars, fitness) :
+        new(ctvars(varmin, varmax), fitness)
 end
 
 @everywhere function ctvars(varmin::Array{Float64}, varmax::Array{Float64})
@@ -169,16 +173,27 @@ end
     end
 end
 
-@everywhere function gaplot(gen::Int64, min::Array{Float64}, ave::Array{Float64})
+@everywhere function gaplot(gen::Int64, nmin::Int64, min::Array{Float64}, ave::Array{Float64},
+    rms::Array{Float64})
     # it's the plot function
     # ---> display the evolution curve real-time
 
     if gen >= 2
         x = 1:gen
         minplot = plot(x, min, label="minimum fitness", lw=6)
-        display(plot!(minplot, ave, seriestype=:scatter, label="average fitness",
-            title="Envolution Curve", lw=3))
+        maplot  = plot!(minplot, ave, seriestype=:scatter, label="average fitness",
+            title="Envolution Curve", xlabel="generations", ylabel = "fitness", lw=3)
+        if gen <= nmin
+            display(maplot)
+        else
+            y = nmin+1:gen
+            rmsplot = plot(y, rms, xlabel = "generations",
+                ylabel = "rms", label = "RMS", lw = 4)
+            plottmp = plot(maplot, rmsplot, layout=(2,1))
+            display(plottmp)
+        end
     end
+
 end
 
 @everywhere function garun(p::Population, varmin::Array{Float64},
@@ -186,8 +201,14 @@ end
     # it's the main run function
     # ---> run the whole GA project and give all the output you need
 
+
+    # create output files
+    logfile = open(pwd()*"//output//ga_log.txt","w");
+
     print("=======================================\n")
     print("====== GA PROCESS IS GOING AHEAD ======\n\n")
+    write(logfile, "=======================================\n")
+    write(logfile, "====== GA PROCESS IS GOING AHEAD ======\n\n")
 
     # parallel computating settings
     np = nprocs()
@@ -208,9 +229,7 @@ end
     minfit = Float64[]
     avefit = Float64[]
     mincre = Creature[]
-
-    # create output files
-    logfile = open(pwd()*"//output//ga_log.txt","w");
+    rmsrec = Float64[]
 
     while true
         # generation goes ahead
@@ -245,18 +264,25 @@ end
         print("+++ No. $(gen) generation is generated successful +++\n")
         print("+++ The average value of the generation is $(avefit[gen]) +++\n")
         print("+++ The min value of the generation is $(minfit[gen]) +++\n")
-        print("+++ The correspond creature of the minfit is $(mincre[gen]) +++\n")
-
-        gaplot(gen, minfit, avefit)
+        print("+++ The correspond creature of the minfit is $(mincre[gen]) +++\n\n")
+        write(logfile, "+++ No. $(gen) generation is generated successful +++\n
+        +++ The average value of the generation is $(avefit[gen]) +++\n
+        +++ The min value of the generation is $(minfit[gen]) +++\n
+        +++ The correspond creature of the minfit is $(mincre[gen]) +++\n\n")
 
         if gen > p.nmin
             rmstmp = rms(minfit[gen], minfit[end-p.nmin:end])
+            push!(rmsrec, rmstmp)
             print("+++ The current generation RMS is $(rmstmp) +++\n\n")
+            write(logfile,"+++ The current generation RMS is $(rmstmp) +++\n\n")
             if convergence(gen, p.nmax, rmstmp, judgement)
-                print("====== GA PROCESS GET CONVERAGE ======\n\n")
+                print("====== GA PROCESS GET CONVERGED ======\n\n")
+                write(logfile, "====== GA PROCESS GET CONVERGED ======\n\n")
                 break
             end
         end
+
+        gaplot(gen, p.nmin, minfit, avefit, rmsrec) # display the curves
 
         gen += 1
     end
