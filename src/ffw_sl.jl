@@ -11,8 +11,8 @@
     # θ_lon = 0.0
     T0 = T
     twistr = 0.8*R
-    twist1 = -0.0*π/180
-    twist2 = 0.0
+    twist1 = -6.50*π/180
+    twist2 = -6.50*π/180
     chord = zeros(Nbe)
     rb = zeros(Nbe) # position of blade control points
     dr = zeros(Nbe) # distance of each two blade control points
@@ -84,7 +84,15 @@
 
         # judge if the indeuce velocity is trimmed
         # rmsind = trvind(vindj[1],vindj[2])
-        if iternum>2 && abs(Tj[2]-Tj[1])<=0.5 #trvind(vindj[1],vindj[2])[1]
+        if iternum>100
+            print("=== Induced Velocity can not be converaged ===\n")
+            print("=== Thrust is $(T0) ===\n")
+            # print("=== The Total Power need is $(power)===\n")
+            return fz_s, β0/π*180, βlon/π*180, βlat/π*180, fy_s, power
+            break
+        end
+
+        if iternum>2 && abs(Tj[2]-Tj[1])<= 5 #trvind(vindj[1],vindj[2])[1]
             print("=== Induced Velocity is converaged ===\n")
             print("=== Thrust is $(T0) ===\n")
             # print("=== The Total Power need is $(power)===\n")

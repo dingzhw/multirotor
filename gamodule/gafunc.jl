@@ -1,6 +1,6 @@
 # fitness and constraint functions of the creatures
 
-function fitness(ct::Creature)
+@everywhere function fitness(ct::Creature)
     # it's the fitness function of the corresponding creature
     # ---> return a value that descripe the fitness
     # ---> to the environment of the creature
@@ -11,7 +11,7 @@ function fitness(ct::Creature)
     return fit
 end
 
-function constraint(vars::Array{Float64})
+@everywhere function constraint(vars::Array{Float64})
     # it's the constraint function consist of constraint conditions
     # ---> if satisfied, then return true
     # ---> if unsatisfied, return fasle

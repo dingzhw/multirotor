@@ -52,10 +52,10 @@ end
     # ---> return the initilization of population
 
     # the creature paremeters range should be ensured here
-    vars = ctvars(varmin, varmax) # random initilize Creatures' vars
     cts = Creature[] # innitilize the creature array
 
     for i in 1:p.ncre
+        vars = ctvars(varmin, varmax) # random initilize Creatures' vars
         push!(cts,Creature(vars, fitness))
     end
 
@@ -150,14 +150,18 @@ end
     return newcres
 end
 
-@everywhere function rms(minval::Float64, meanay::Array{Float64})
+@everywhere function rms(minval::Float64, meanay::Array{Float64}, cfit)
     # it's the residual error function
     # ---> return the difference between the current fitness result with
     # ---> the mean fitness result of the current 10 generations
 
-    ave = mean(meanay)
-    rmsv = abs(minval/ave-1)
-    return rmsv
+    if minval <=cfit
+        return 0.
+    else
+        ave = mean(meanay)
+        rmsv = abs(minval/ave-1)
+        return rmsv
+    end
 end
 
 @everywhere function convergence(gen::Int64, nmax::Int64, rmsv::Float64, judgement=1e-1)
@@ -185,19 +189,23 @@ end
             title="Envolution Curve", xlabel="generations", ylabel = "fitness", lw=3)
         if gen <= nmin
             display(maplot)
+            savefig(pwd()*"//output//plots//envolution_curve_*$(now())")
         else
             y = nmin+1:gen
             rmsplot = plot(y, rms, xlabel = "generations",
                 ylabel = "rms", label = "RMS", lw = 4)
             plottmp = plot(maplot, rmsplot, layout=(2,1))
             display(plottmp)
+            savefig(pwd()*"//output//plots//envolution_curve_*$(now())")
         end
     end
+
+
 
 end
 
 @everywhere function garun(p::Population, varmin::Array{Float64},
-    varmax::Array{Float64}, λ=0.6, judgement = 1e-1)
+    varmax::Array{Float64}, cfit = 1., λ=0.6, judgement = 1e-1)
     # it's the main run function
     # ---> run the whole GA project and give all the output you need
 
@@ -271,7 +279,7 @@ end
         +++ The correspond creature of the minfit is $(mincre[gen]) +++\n\n")
 
         if gen > p.nmin
-            rmstmp = rms(minfit[gen], minfit[end-p.nmin:end])
+            rmstmp = rms(minfit[gen], minfit[end-p.nmin:end], cfit)
             push!(rmsrec, rmstmp)
             print("+++ The current generation RMS is $(rmstmp) +++\n\n")
             write(logfile,"+++ The current generation RMS is $(rmstmp) +++\n\n")
@@ -290,7 +298,7 @@ end
     close(logfile);
 
     toc()
-    return  minfit, avefit, mincre, cts
+    return  minfit, avefit, mincre[gen], cts
 end
 
 
