@@ -196,7 +196,7 @@ end
                 ylabel = "rms", label = "RMS", lw = 4)
             plottmp = plot(maplot, rmsplot, layout=(2,1))
             display(plottmp)
-            savefig(pwd()*"//output//plots//envolution_curve_*$(now())")
+            savefig(pwd()*"//output//plots//envolution_curve_$(now())")
         end
     end
 

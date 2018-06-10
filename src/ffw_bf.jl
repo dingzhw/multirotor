@@ -1,26 +1,51 @@
 # This script is for blade flap calculation
 # 给出旋翼挥舞模型
 
+@everywhere function staticbf(θ75, θtw, θlon, θlat, μ, λtpp)
+    # static solution for blade flap
+    # ---> use as the initilization values for Runge-Kutta Method
+
+    β = zeros(npsi+1)
+    dβ = zeros(npsi+1)
+    ddβ = zeros(npsi+1)
+
+    # parameters
+    a = 2*π
+    c = chroot
+    γ = ρ*a*c*R^4/Iβ
+
+    # simplified solution
+    βlon = -θlon-((8/3)*μ*(θ75-(3/4)*λtpp))/(1+(3/2)*μ^2)
+    β0 = γ*(θ75/8*(1+μ^2)-μ^2/60*θtw-λtpp/6+μ/6*(βlon+θlon))
+    βlat = θlat-((4/3)*μ*β0)/(1+(1/2)*μ^2)
+
+    for i in 1:npsi+1
+        β[i] = β0+βlon*cos(ψ)+βlat*sin(ψ)
+        dβ[i] = (-βlon*sin(ψ)+βlat*cos(ψ))*Ω
+        ddβ[i] = (-βlon*cos(ψ)+βlat*sin(ψ))*Ω^2
+    end
+
+    return β, dβ, ddβ
+end
+
+
 @everywhere function bladeflap(β, dβ, ddβ, vber, chord, θ0, θ_lat, θ_lon, dr, rb, rotor=1)
     # 当k只取1的时候，认为所有的桨叶挥舞特性都是一致的
     # Initilize the value of β
 
-    # 挥舞迭代计数器
-    inum = Int64(0)
+    # rms recorder
+    inum = 1
     rmsbeta = Float64[]
-
-    # vber = vbe(vind, β, dβ)
     θ  = theget(θ0, θ_lat, θ_lon, rotor)
-    α  = aoaget(vber, β, θ, rotor)
-
 
     while true
-        inum += 1
-
         if inum>1000
-            print("挥舞迭代次数过多！失败！")
+            print("挥舞迭代次数过多！失败！\n")
             return false, rmsbeta
         end
+
+        # vber = vbe(vind, β, dβ)
+        α  = aoaget(vber, β, θ, rotor)
 
         # Runge Kutta 4th order method
         for i in 1:npsi
@@ -34,27 +59,27 @@
             dβ[i+1] = dβ[i]+dt/6*(f1+2*f2+2*f3+f4)
             ddβ[i+1] = f1
         end
-        print("=== β is $(β) ===\n
-        === dβ is $(dβ) ===\n
-        === ddβ is $(ddβ) ===\n\n")
+        # print("=== β is $(β) ===\n
+        # === dβ is $(dβ) ===\n
+        # === ddβ is $(ddβ) ===\n\n")
         #
-        # β[1] 	= (β[1]+β[npsi+1])/2
-        # dβ[1]	= (dβ[1]+dβ[npsi+1])/2
-        # ddβ[1]	= (ddβ[1]+ddβ[npsi+1])/2
+        β[1] 	= (β[1]+β[npsi+1])/2
+        dβ[1]	= (dβ[1]+dβ[npsi+1])/2
+        ddβ[1]	= (ddβ[1]+ddβ[npsi+1])/2
 
         # judge if flap converaged
         rmsβ = abs(β[1]-β[npsi+1]) +abs(dβ[1]-dβ[npsi+1])+
                     abs(ddβ[1]-ddβ[npsi+1])
-        print("+++++++++++++++++++++++++++++++++++\n")
-        print("+++++++++ rmsβ is $(rmsβ) +++++++++\n")
-        print("+++++++++++++++++++++++++++++++++++\n")
+        # print("+++++++++++++++++++++++++++++++++++\n")
+        # print("+++++++++ rmsβ is $(rmsβ) +++++++++\n")
+        # print("+++++++++++++++++++++++++++++++++++\n")
         push!(rmsbeta, rmsβ)
         if rmsβ<1e-1
-            print("%%%%%%%%%%%%%%%%%CONVERAGED%%%%%%%%%%%%%%%%\n")
+            # print("%%%%%%%%%%%%%%%%%CONVERAGED%%%%%%%%%%%%%%%%\n")
             break
         end
 
-        # inum += 1
+        inum += 1
     end
 
     # 求出等效的纵横向挥舞角（用于配平）

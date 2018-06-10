@@ -28,8 +28,11 @@
                     sin((i-1)/Nbe*cbe*π/2))/sin(cbe*π/2)/2)
     end
 
-    θ0 = the0(θcp, twistr, twist1, twist2, rb) # calculate the install angle
+    θ0tmp = the0(θcp, twistr, twist1, twist2, rb) # calculate the install angle
+    θ0 = θ0tmp[1]
+    θ75 = θ0tmp[2]
 
+    βtmp = staticbf(θ75, (twist1+twist2), θ_lon, θ_lat, μ_air, abs(λ_air+uniforminflow(T)[1]))
     β = zeros(npsi+1)
     dβ = zeros(npsi+1)
     ddβ = zeros(npsi+1)

@@ -13,7 +13,9 @@
         end
     end
 
-    return θ0
+    θ75 = θ0[trunc(Int,Nbe*0.75)]
+
+    return θ0, θ75
 end
 
 @everywhere function theget(θ0, θ_lat, θ_lon, rotor=1)
