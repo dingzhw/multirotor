@@ -20,11 +20,14 @@
     # --- as shown above
     lift = lbe*abs(1/2*ρ*norm(vbe_r)^2*chord*fcl(α))
     drag = dbe*abs(1/2*ρ*norm(vbe_r)^2*chord*fcd(α))
+    lift_beta = betobeta(lift, β)
+    drag_beta = betobeta(drag, β)
+    fz_β      = (lift_beta[3]+drag_beta[3])*dr # the blade element z-force in flap coordination
     lift_ro = betoro(lift, β, θ, rotor)
     drag_ro = betoro(drag, β, θ, rotor)
-    fz_be = (lift_ro[3]+drag_ro[3])*dr
+    fz_be = (lift_ro[3]+drag_ro[3])*dr # the blade element aerodynamic force in rotation coordination
     fy_be = (lift_ro[2]+drag_ro[2])*dr
-    return fy_be, fz_be
+    return fy_be, fz_be, fz_β
 end
 
 @everywhere function bladeaero(vall_r, chord, α, β, ddβ, θ, dr, rb, rotor=1)
@@ -32,20 +35,23 @@ end
 
     fy_blade = 0.0
     fz_blade = 0.0
-    Mβ       = 0.0
+    # Mβ       = 0.0
     MQ       = 0.0
+    Maero    = 0.0
 
     for j in 1:Nbe
         fbe = beaero(vall_r[j], chord[j], α[j], β, θ[j], dr[j], rotor)
         fy_blade += fbe[1]
         fz_blade += fbe[2]
         MQ       += fbe[1]*rb[j]
-        Mβ       += (m_*g*dr[j]*(rb[j]-eflap)*cos(β)+
-                     m_*dr[j]*ddβ*(rb[j]-eflap)^2+
-                     m_*dr[j]*Ω^2*(rb[j]-eflap)*cos(β)*(rb[j]-eflap)*sin(β)-
-                     fbe[2]*dr[j]*(rb[j]-eflap))
+        Maero    += fbe[3]*(rb[j]-eflap)
+
+        # Mβ       += (m_*g*dr[j]*(rb[j]-eflap)*cos(β)+
+        #              m_*dr[j]*ddβ*(rb[j]-eflap)^2+
+        #              m_*dr[j]*Ω^2*(eflap+(rb[j]-eflap)*cos(β))*(rb[j]-eflap)*sin(β)-
+        #              fbe[3]*(rb[j]-eflap))
     end
-    return fy_blade, fz_blade, MQ, Mβ
+    return fy_blade, fz_blade, MQ, Maero
 end
 
 @everywhere function rotoraero(vber, chord, β, dβ, ddβ, θ0, θ_lat, θ_lon, dr, rb, rotor=1)

@@ -12,6 +12,7 @@ const airfoil = "NACA0012" # Airfoil
 const ecut = 0.24 #桨叶根切比例 无量纲
 const eflap = 0.05 #桨叶挥舞铰偏置量，量纲m
 const m_ = 0.222 #桨叶质量密度 量纲kg/m
+const Sm = 1/2*(R-eflap)^2*m_ # mass inertia
 const Ω = 230  #旋翼转速 量纲rad/s
 const Vtip = Ω*R # blade tip velocity
 const αs = 3.0*π/180.0  # 旋翼轴倾角  量纲rad
