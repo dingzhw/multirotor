@@ -22,8 +22,8 @@
         for i in 2:(npsi+1) # 一周挥舞变化
             # ψ = (i-1)*dψ
             ddβ[i] = ddβ[i-1]
-            dβ[i] = dβ[i-1]+ddβ[i-1]*dt
-            β[i] = β[i-1]+dβ[i-1]*dt+ddβ[i-1]*dt^2
+            dβ[i] = dβ[i-1]+ddβ[i]*dt
+            β[i] = β[i-1]+dβ[i]*dt
             while true
                 Mβ = bladeaero(vber[i-1,:], chord, α[i-1,:], β[i], ddβ[i], θ[i-1,:], dr, rb)[4]
                 if abs(Mβ)<1 # 判断挥舞铰处总力矩是否为零
