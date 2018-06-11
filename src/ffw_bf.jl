@@ -20,14 +20,22 @@
     βlat = θlat-((4/3)*μ*β0)/(1+(1/2)*μ^2)
 
     for i in 1:npsi+1
+        ψ = (i-1)*dψ
         β[i] = β0+βlon*cos(ψ)+βlat*sin(ψ)
         dβ[i] = (-βlon*sin(ψ)+βlat*cos(ψ))*Ω
         ddβ[i] = (-βlon*cos(ψ)+βlat*sin(ψ))*Ω^2
     end
 
-    return β, dβ, ddβ
-end
+    β1   = β[Int64(1)]
+    β2   = β[Int64(npsi/4)]
+    β3   = β[Int64(npsi/2)]
+    β4   = β[Int64(npsi/4*3)]
+    β0   = ((β1+β3)/2+(β2+β4)/2)/2
+    βlon = -(β1-β3)/2
+    βlat = -(β2-β4)/2
 
+    return β, dβ, ddβ, β0, βlon, βlat 
+end
 
 @everywhere function bladeflap(β, dβ, ddβ, vber, chord, θ0, θ_lat, θ_lon, dr, rb, rotor=1)
     # 当k只取1的时候，认为所有的桨叶挥舞特性都是一致的

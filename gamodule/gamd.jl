@@ -1,6 +1,6 @@
 # it is a genetic algorithm moudle
 
-@everywhere module GAMD
+module GAMD
 using Plots
 
 export Population, Creature, garun
@@ -72,12 +72,16 @@ end
     # ---> return the fitness array
 
     cts = copy(ctso) # store the creature of population data into "cts"
-    fits = Float64[] # fitness value initilization
-    for i in 1:length(cts)
-        push!(fits, cts[i].fitness(cts[i]))
-    end
+    # fits = Float64[] # fitness value initilization
+    fittmp = pmap(fitness, cts)
 
-    return fits
+    # @sync @parallel for i in 1:length(cts)
+    #     push!(fits, cts[i].fitness(cts[i]))
+    # end
+    #
+    # fittmp = fetch(fits)
+
+    return fittmp
 end
 
 @everywhere function selection(ctso::Array{Creature}, fitss::Array{Float64}, npare::Int64)
@@ -189,19 +193,16 @@ end
             title="Envolution Curve", xlabel="generations", ylabel = "fitness", lw=3)
         if gen <= nmin
             display(maplot)
-            savefig(pwd()*"//output//plots//envolution_curve_*$(now())")
+            savefig(pwd()*"//output//plots//envolution_curve_$(gen)")
         else
             y = nmin+1:gen
             rmsplot = plot(y, rms, xlabel = "generations",
                 ylabel = "rms", label = "RMS", lw = 4)
             plottmp = plot(maplot, rmsplot, layout=(2,1))
             display(plottmp)
-            savefig(pwd()*"//output//plots//envolution_curve_$(now())")
+            savefig(pwd()*"//output//plots//envolution_curve_$(gen)")
         end
     end
-
-
-
 end
 
 @everywhere function garun(p::Population, varmin::Array{Float64},
@@ -218,19 +219,10 @@ end
     write(logfile, "=======================================\n")
     write(logfile, "====== GA PROCESS IS GOING AHEAD ======\n\n")
 
-    # parallel computating settings
-    np = nprocs()
-    print("*** Input your cores number and press 'Enter': \n")
-    np_ = readline()
-    np_ = parse(Int64, np_)
-    print("*** Your cores number is $(np_) .\n\n")
-    if np_>= np
-        addprocs(np_-np)
-    end
-
     tic();
     gen = 1 # initilize the generation
     cts = creator(p, varmin, varmax) # initilize the creatures
+    print("+++++++++++++++++ cts is $(cts) +++++++++++++++\n\n")
     p = Population(ncre, nmax, nmin, npar, mr, rpr)
 
     # parameters initilization
@@ -242,24 +234,37 @@ end
     while true
         # generation goes ahead
 
-        # cores calculation distribution
-        npop = length(cts)
-        npop_ = Int64(npop%np)
-        ncore_ = Int64((npop - npop_)/np)
+        # # cores calculation distribution
+        # npop = length(cts)
+        # npop_ = Int64(npop%np)
+        # ncore_ = Int64((npop - npop_)/np)
+        #
+        # # ====== fitness function parallel computation ======
+        # sel = Array{Any}(np)
+        # for i in 1:np-1
+        #     sel[i] = remotecall_fetch(calfit, i, cts[ncore_*(i-1)+1:ncore_*i])
+        # end
+        #
+        # # sel1 = remotecall_fetch(calfit, 1, cts[ncore_*(1-1)+1:ncore_*1])
+        # # sel2 = remotecall_fetch(calfit, 2, cts[ncore_*(2-1)+1:ncore_*2])
+        # # sel3 = remotecall_fetch(calfit, 3, cts[ncore_*(3-1)+1:ncore_*3])
+        #
+        # sel[np] = remotecall_fetch(calfit, np, cts[ncore_*(np-1)+1:end])
+        #
+        # # sel4 = remotecall_fetch(calfit, np, cts[ncore_*(np-1)+1:end])
+        # # sel[1] = sel1
+        # # sel[2] = sel2
+        # # sel[3] = sel3
+        # # sel[4] = sel4
+        # # ====== parallel computation complete ======
+        #
+        # fittmp = Float64[]
+        # for i in 1:np # combine sel arraies into one array
+        #     append!(fittmp, sel[i])
+        # end
 
-        # ====== fitness function parallel computation ======
-        sel = Array{Any}(np)
-        for i in 1:np-1
-            sel[i] = remotecall_fetch(calfit, i, cts[ncore_*(i-1)+1:ncore_*i])
-        end
-        sel[np] = remotecall_fetch(calfit, np, cts[ncore_*(np-1)+1:end])
-        # ====== parallel computation complete ======
-
-        fittmp = Float64[]
-        for i in 1:np # combine sel arraies into one array
-            append!(fittmp, sel[i])
-        end
-
+        fittmp = calfit(cts)
+        print("++++++++++fittmp is $(fittmp) ++++++++++++\n\n")
         seltmp = selection(cts, fittmp, p.npar) # select the suitable parents
 
         pare = seltmp[1]

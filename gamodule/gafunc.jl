@@ -1,6 +1,9 @@
 # fitness and constraint functions of the creatures
 
-@everywhere function fitness(ct::Creature)
+module gafunc
+# functions should be used in the GA module
+
+@everywhere function fitnesstest(ct::Creature)
     # it's the fitness function of the corresponding creature
     # ---> return a value that descripe the fitness
     # ---> to the environment of the creature
@@ -11,10 +14,12 @@
     return fit
 end
 
-@everywhere function constraint(vars::Array{Float64})
+@everywhere function constrainttest(vars::Array{Float64})
     # it's the constraint function consist of constraint conditions
     # ---> if satisfied, then return true
     # ---> if unsatisfied, return fasle
 
     return true
+end
+
 end

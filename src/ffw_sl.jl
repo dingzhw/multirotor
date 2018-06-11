@@ -33,9 +33,15 @@
     θ75 = θ0tmp[2]
 
     βtmp = staticbf(θ75, (twist1+twist2), θ_lon, θ_lat, μ_air, abs(λ_air+uniforminflow(T)[1]))
-    β = zeros(npsi+1)
-    dβ = zeros(npsi+1)
-    ddβ = zeros(npsi+1)
+    β = βtmp[1] # zeros(npsi+1)
+    dβ = βtmp[2] # zeros(npsi+1)
+    ddβ = βtmp[3] # zeros(npsi+1)
+    β0 = βtmp[4]
+    βlon = βtmp[5]
+    βlat = βtmp[6]
+    # print("β is $(β)++++++\n
+    # dβ is $(dβ)++++++\n
+    # ddβ is $(ddβ)+++++\n")
 
     vr = vortexring1[]
     vdiskind = zeros(npsi,Nbe)

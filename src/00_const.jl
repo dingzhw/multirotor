@@ -45,31 +45,27 @@ const cut = 10*R # wake cutoff distance
 const disr = 1.3*R # the distance between two rotors in Y coordination
 const hr = 0.2*R # the distance between two rotors in Z coordination
 
-# NACA 0012 airfoil data import and interpolate
-using Interpolations;
-# @everywhere function caeroimport(filename=pwd()*"\\input\\naca0012_cl")
-@everywhere function caeroimport(filename=pwd()*"//input//naca0012_cl")
-    # 本函数的作用是读取相应的数据文件，并由此生成插值序列
-    cafile = open(filename,"r")
-    calines = readlines(cafile)
-    rownum = length(calines)
-    catmp = Float64[]
-    for i in 1:rownum
-        if calines[i] == ""
-            break
-        end
-        cama = split(calines[i],"\t")
-        for j in 2:length(cama)-1
-            camaf = parse(Float64,cama[j])
-            append!(catmp, camaf)
-        end
-    end
-    colnum = Int64(length(catmp)/rownum)
-    cacof = reshape(catmp, colnum, rownum)
-    caitp = interpolate(cacof, BSpline(Linear()), OnGrid())
-    return caitp
-end
+# define calculation vars for ffw
+const ϵr = 0.7 # the distance from rotor center to control points cycle
+const A0 = [1.,0.,0]*ϵr*R # new released vortex ring control points
+const B0 = [0.,1.,0]*ϵr*R
+const C0 = [-1,0.,0]*ϵr*R
+const D0 = [0.,-1,0]*ϵr*R
+const A01 = A0+[0., disr, hr] # control points of the other tandem rotor
+const B01 = B0+[0., disr, hr]
+const C01 = C0+[0., disr, hr]
+const D01 = D0+[0., disr, hr]
 
-clitp_na12 = caeroimport() # 生成升力系数插值序列
-# cditp_na12 = caeroimport(pwd()*"\\input\\naca0012_cd") # 生成阻力系数插值序列
-cditp_na12 = caeroimport(pwd()*"//input//naca0012_cd") # 生成阻力系数插值序列
+# set paremeters for ga module
+const ncre = 20
+const nmax = 20*20
+const nmin = 20
+const npar = 6
+const mr = 0.5
+const rpr = 0.8
+
+const varmin = [-22.,-22.,-22.]*π/180
+const varmax = [42.,22.,22.]*π/180
+
+const ξ = 0.6 # triming weighting coefficient
+const cfit = 1. # if minfits is less than cfit, then convergence is reached too

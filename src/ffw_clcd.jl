@@ -1,3 +1,32 @@
+# NACA 0012 airfoil data import and interpolate
+@everywhere using Interpolations;
+# @everywhere function caeroimport(filename=pwd()*"\\input\\naca0012_cl")
+@everywhere function caeroimport(filename=pwd()*"//input//naca0012_cl")
+    # 本函数的作用是读取相应的数据文件，并由此生成插值序列
+    cafile = open(filename,"r")
+    calines = readlines(cafile)
+    rownum = length(calines)
+    catmp = Float64[]
+    for i in 1:rownum
+        if calines[i] == ""
+            break
+        end
+        cama = split(calines[i],"\t")
+        for j in 2:length(cama)-1
+            camaf = parse(Float64,cama[j])
+            append!(catmp, camaf)
+        end
+    end
+    colnum = Int64(length(catmp)/rownum)
+    cacof = reshape(catmp, colnum, rownum)
+    caitp = interpolate(cacof, BSpline(Linear()), OnGrid())
+    return caitp
+end
+
+@everywhere clitp_na12 = caeroimport() # 生成升力系数插值序列
+# cditp_na12 = caeroimport(pwd()*"\\input\\naca0012_cd") # 生成阻力系数插值序列
+@everywhere cditp_na12 = caeroimport(pwd()*"//input//naca0012_cd") # 生成阻力系数插值序列
+
 # 求解aoa以及对应的cl,cd
 @everywhere function the0(θcp, twistr, twist1, twist2, rb)
     # get the collective angle in the blade root

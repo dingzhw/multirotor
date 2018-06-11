@@ -3,18 +3,7 @@
 # --- velocity of the whole rotor pane
 
 # using packages
-using Elliptic
-
-# define calculation vars
-const ϵr = 0.7 # the distance from rotor center to control points cycle
-const A0 = [1.,0.,0]*ϵr*R # new released vortex ring control points
-const B0 = [0.,1.,0]*ϵr*R
-const C0 = [-1,0.,0]*ϵr*R
-const D0 = [0.,-1,0]*ϵr*R
-const A01 = A0+[0., disr, hr] # control points of the other tandem rotor
-const B01 = B0+[0., disr, hr]
-const C01 = C0+[0., disr, hr]
-const D01 = D0+[0., disr, hr]
+@everywhere using Elliptic
 
 ################################################################################
 
