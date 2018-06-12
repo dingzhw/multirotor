@@ -1,0 +1,99 @@
+=======================================
+====== GA PROCESS IS GOING AHEAD ======
+
++++ No. 1 generation is generated successful +++
+
+        +++ The average value of the generation is 51.819592232755284 +++
+
+        +++ The min value of the generation is 14.802383983209435 +++
+
+        +++ The correspond creature of the minfit is Creature([0.51423, 0.252615, -0.354041], fitness) +++
+
++++ No. 2 generation is generated successful +++
+
+        +++ The average value of the generation is 34.99269784968627 +++
+
+        +++ The min value of the generation is 9.39982602893244 +++
+
+        +++ The correspond creature of the minfit is Creature([0.535522, 0.0302509, -0.259953], fitness) +++
+
++++ No. 3 generation is generated successful +++
+
+        +++ The average value of the generation is 24.994051486979192 +++
+
+        +++ The min value of the generation is 8.874438011728499 +++
+
+        +++ The correspond creature of the minfit is Creature([0.31676, 0.066891, 0.133397], fitness) +++
+
++++ No. 4 generation is generated successful +++
+
+        +++ The average value of the generation is 39.16992160727921 +++
+
+        +++ The min value of the generation is 8.874438011728499 +++
+
+        +++ The correspond creature of the minfit is Creature([0.31676, 0.066891, 0.133397], fitness) +++
+
++++ No. 5 generation is generated successful +++
+
+        +++ The average value of the generation is 34.68535191582861 +++
+
+        +++ The min value of the generation is 8.874438011728499 +++
+
+        +++ The correspond creature of the minfit is Creature([0.31676, 0.066891, 0.133397], fitness) +++
+
++++ No. 6 generation is generated successful +++
+
+        +++ The average value of the generation is 29.977519579153633 +++
+
+        +++ The min value of the generation is 8.874438011728499 +++
+
+        +++ The correspond creature of the minfit is Creature([0.31676, 0.066891, 0.133397], fitness) +++
+
++++ No. 7 generation is generated successful +++
+
+        +++ The average value of the generation is 44.24750695776786 +++
+
+        +++ The min value of the generation is 8.874438011728499 +++
+
+        +++ The correspond creature of the minfit is Creature([0.31676, 0.066891, 0.133397], fitness) +++
+
++++ No. 8 generation is generated successful +++
+
+        +++ The average value of the generation is 50.72954333065198 +++
+
+        +++ The min value of the generation is 8.726628655429783 +++
+
+        +++ The correspond creature of the minfit is Creature([0.310285, 0.0718601, 0.0998522], fitness) +++
+
++++ No. 9 generation is generated successful +++
+
+        +++ The average value of the generation is 57.04527129231649 +++
+
+        +++ The min value of the generation is 8.726628655429783 +++
+
+        +++ The correspond creature of the minfit is Creature([0.310285, 0.0718601, 0.0998522], fitness) +++
+
++++ No. 10 generation is generated successful +++
+
+        +++ The average value of the generation is 39.97367945559516 +++
+
+        +++ The min value of the generation is 8.726628655429783 +++
+
+        +++ The correspond creature of the minfit is Creature([0.310285, 0.0718601, 0.0998522], fitness) +++
+
++++ No. 11 generation is generated successful +++
+
+        +++ The average value of the generation is 27.909046304591705 +++
+
+        +++ The min value of the generation is 7.835524227606953 +++
+
+        +++ The correspond creature of the minfit is Creature([0.341364, 0.0182717, 0.119947], fitness) +++
+
++++ No. 12 generation is generated successful +++
+
+        +++ The average value of the generation is 22.054589107015794 +++
+
+        +++ The min value of the generation is 7.641045921097234 +++
+
+        +++ The correspond creature of the minfit is Creature([0.332092, 0.0375484, 0.104509], fitness) +++
+
