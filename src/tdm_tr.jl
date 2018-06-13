@@ -31,7 +31,7 @@
             return soltmp, θtdm
             break
         else
-            print("\n*********第$(itrm)次尝试配平，很遗憾，暂时还没成功*********\n\n")
+            print("\n*********第$(itrim)次尝试配平，很遗憾，暂时还没成功*********\n\n")
             mat = trfunc(θtdm, solf)
             # print("|--------------------------------|\n")
             # print("====== The Jocobi Matrix ======\n")
@@ -57,7 +57,7 @@
     end
 end
 
-@everywhere function ntiter(θtdm, solf::Function, ϵ=1*π/180)
+@everywhere function ntiter(θtdm, solf::Function, ϵ=0.5*π/180)
 	# Newton iteration method
 
 	θtdm1 = θtdm[1:3] # 旋翼 1 操纵量

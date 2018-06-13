@@ -134,8 +134,8 @@
             print("=== Rotor2 Power is $(power2) ===\n")
             print("++++++++++++++++++++++++++++++++++++++++++++++++++++\n\n")
             # print("=== The Total Power need is $(power)===\n")
-            return [[fz_s1, β01/π*180, βlon1/π*180, βlat1/π*180, fy_s1, power1, vind1_],
-                    [fz_s2, β02/π*180, βlon2/π*180, βlat2/π*180, fy_s2, power2, vind2_],
+            return [[fz_s1, β01, βlon1, βlat1, fy_s1, power1, vind1_],
+                    [fz_s2, β02, βlon2, βlat2, fy_s2, power2, vind2_],
                     [T0, abs(abs(MQ1)-abs(MQ2))]]
             break
         end
