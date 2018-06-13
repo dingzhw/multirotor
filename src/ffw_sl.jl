@@ -17,8 +17,6 @@
     rb = zeros(Nbe) # position of blade control points
     dr = zeros(Nbe) # distance of each two blade control points
     cbe = 0.8   # Range[0,1] for adjust the denisty of rd[] in tip, lager for more dense
-    βlon = 0.0
-    βlat = 0.0
 
     for i in 1:Nbe
         chord[i] = chroot*taper*(i-1)/Nbe
@@ -79,15 +77,15 @@
 
         # record the No. i-1 and i induced velocity for compare
         if iternum == 1
-            vindj[1] = vdiskind
+            vindj[1] = mean(vdiskind)[3]/(Ω*R)
             Tj[1]     = T0
         elseif iternum == 2
-            vindj[2] = vdiskind
+            vindj[2] = mean(vdiskind)[3]/(Ω*R)
             Tj[2]     = T0
         else
             vindj[1] = vindj[2]
             Tj[1]     = Tj[2]
-            vindj[2] = vdiskind
+            vindj[2] = mean(vdiskind)[3]/(Ω*R)
             Tj[2]     = T0
         end
 
@@ -97,15 +95,15 @@
             print("=== Induced Velocity can not be converaged ===\n")
             print("=== Thrust is $(T0) ===\n")
             # print("=== The Total Power need is $(power)===\n")
-            return fz_s, β0/π*180, βlon/π*180, βlat/π*180, fy_s, power
+            return fz_s, β0, βlon, βlat, fy_s, power, vind_
             break
         end
 
-        if iternum>2 && abs(Tj[2]-Tj[1])<= 5 #trvind(vindj[1],vindj[2])[1]
+        if iternum>2 && abs(vindj[2]-vindj[1])<=1e-3# && abs(Tj[2]-Tj[1])<= 5
             print("=== Induced Velocity is converaged ===\n")
             print("=== Thrust is $(T0) ===\n")
             # print("=== The Total Power need is $(power)===\n")
-            return fz_s, β0/π*180, βlon/π*180, βlat/π*180, fy_s, power
+            return fz_s, β0, βlon, βlat, fy_s, power, vind_
             break
         end
 
@@ -113,16 +111,26 @@
         vbertmp = vbe(vdiskind, β, dβ, rb)
         vber    = vbertmp[1]
 
-        # calculate the blade flap
-        bftmp = bladeflap(β, dβ, ddβ, vber, chord, θ0, θ_lat, θ_lon, dr, rb)
-        if bftmp[1]   # judge if the flap iteration converaged
-            β    = bftmp[2]
-            dβ   = bftmp[3]
-            ddβ  = bftmp[4]
-            β0   = bftmp[5]
-            βlon = bftmp[6]
-            βlat = bftmp[7]
-        end
+        # # calculate the blade flap using 精细数值方法
+        # bftmp = bladeflap(β, dβ, ddβ, vber, chord, θ0, θ_lat, θ_lon, dr, rb)
+        # if bftmp[1]   # judge if the flap iteration converaged
+        #     β    = bftmp[2]
+        #     dβ   = bftmp[3]
+        #     ddβ  = bftmp[4]
+        #     β0   = bftmp[5]
+        #     βlon = bftmp[6]
+        #     βlat = bftmp[7]
+        # end
+
+        # 使用经验公式求解挥舞
+        vind_ = mean(vdiskind)[3]/(Ω*R)
+        βtmp = staticbf(θ75, (twist1+twist2), θ_lon, θ_lat, μ_air, abs.(λ_air+vind_))
+        β = βtmp[1]
+        dβ = βtmp[2]
+        ddβ = βtmp[3]
+        β0 = βtmp[4]
+        βlon = βtmp[5]
+        βlat = βtmp[6]
 
         # calculate force, moment and power
         rftmp = rotoraero(vber, chord, β, dβ, ddβ, θ0, θ_lat, θ_lon, dr, rb)

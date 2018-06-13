@@ -1,7 +1,7 @@
 # This script is for blade flap calculation
 # 给出旋翼挥舞模型
 
-@everywhere function staticbf(θ75, θtw, θlon, θlat, μ, λtpp)
+@everywhere function staticbf(θ75, θtw, θlon, θlat, μ, λtpp, rotor=1)
     # static solution for blade flap
     # ---> use as the initilization values for Runge-Kutta Method
 
@@ -20,7 +20,7 @@
     βlat = θlat-((4/3)*μ*β0)/(1+(1/2)*μ^2)
 
     for i in 1:npsi+1
-        ψ = (i-1)*dψ
+        ψ = (-1)^(rotor-1)*(i-1)*dψ
         β[i] = β0+βlon*cos(ψ)+βlat*sin(ψ)
         dβ[i] = (-βlon*sin(ψ)+βlat*cos(ψ))*Ω
         ddβ[i] = (-βlon*cos(ψ)+βlat*sin(ψ))*Ω^2
@@ -34,7 +34,7 @@
     βlon = -(β1-β3)/2
     βlat = -(β2-β4)/2
 
-    return β, dβ, ddβ, β0, βlon, βlat 
+    return β, dβ, ddβ, β0, βlon, βlat
 end
 
 @everywhere function bladeflap(β, dβ, ddβ, vber, chord, θ0, θ_lat, θ_lon, dr, rb, rotor=1)

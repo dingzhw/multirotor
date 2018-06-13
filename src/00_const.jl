@@ -15,10 +15,10 @@ const m_ = 0.222 #桨叶质量密度 量纲kg/m
 const Sm = 1/2*(R-eflap)^2*m_ # mass inertia
 const Ω = 230  #旋翼转速 量纲rad/s
 const Vtip = Ω*R # blade tip velocity
-const αs = 3.0*π/180.0  # 旋翼轴倾角  量纲rad
+const αs = -3.0*π/180.0  # 旋翼轴倾角  量纲rad
 const Kβ = 0.0  # 桨叶根部挥舞弹簧刚度 量纲？？？
-const vair = 28.5 # 来流速度 量纲 m/s
-const T = 500/cos(αs) #飞行器重量 (量纲为kg*m*s^-2)
+const vair = 0. # 来流速度 量纲 m/s
+const T = 1000/cos(αs) #飞行器重量 (量纲为kg*m*s^-2)
 const dpsideg = 10.0  # 方位角步进长度（量纲为deg）
 const betap = 0.0/180*π # Precone
 # const βang0 = 0.0/180*π # 挥舞角初值
@@ -41,8 +41,10 @@ const mnonc = ρ*A*Ω^2*R^3 #力矩的无量纲化参数 量纲kg*m^2/s^2
 const dψ = dpsideg*π/180 #方位角步进步长 (量纲为rad)
 const dt = dψ/Ω # 方位角步进时间 （量纲为s）
 const npsi = Int64(360/dpsideg) # 周向分割步数
+
+# 双旋翼参数设置
 const cut = 10*R # wake cutoff distance
-const disr = 1.3*R # the distance between two rotors in Y coordination
+const disr = 1.1*R # the distance between two rotors in Y coordination
 const hr = 0.2*R # the distance between two rotors in Z coordination
 
 # define calculation vars for ffw
@@ -64,8 +66,6 @@ const npar = 6
 const mr = 0.5
 const rpr = 0.8
 
-const varmin = [-22.,-22.,-22.]*π/180
-const varmax = [42.,22.,22.]*π/180
-
 const ξ = 0.6 # triming weighting coefficient
+const lossξ = 6 # 针对劣势个体的惩罚因子
 const cfit = 1. # if minfits is less than cfit, then convergence is reached too

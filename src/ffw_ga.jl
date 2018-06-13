@@ -5,11 +5,23 @@ include(pwd()*"//gamodule//gamd.jl")
 @everywhere using Plots; gr()
 using GAMD
 
+# 给定参数变化范围
+@everywhere const varmin = [0.,-22.,-22.]*π/180
+@everywhere const varmax = [42.,22.,22.]*π/180
+
 # functions
 @everywhere function fitness(ct::Creature)
     vars = ct.vars
     fittmp = sol_ffw(vars[1], vars[2], vars[3])
-    fits = ξ*abs(T-fittmp[1])/10 +(1-ξ)/2*abs(0.-fittmp[3])+(1-ξ)/2*abs(0.-fittmp[4])
+    if fittmp[1]>0
+        fits = ξ*abs(T-fittmp[1])/10 +
+            (1-ξ)/2*abs(0.-fittmp[3])/(1/180*π)+
+            (1-ξ)/2*abs(0.-fittmp[4])/(1/180*π)
+    else
+        fits = lossξ*abs(T-fittmp[1])/10 +
+            (1-lossξ)/2*abs(0.-fittmp[3])/(1/180*π)+
+            (1-lossξ)/2*abs(0.-fittmp[4])/(1/180*π)
+    end
     return fits
 end
 
