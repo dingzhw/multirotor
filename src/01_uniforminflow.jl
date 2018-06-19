@@ -2,7 +2,7 @@
 # 给出均匀入流模型
 
 @everywhere function uniforminflow(T)
-    vind_s = [0.0,0.0,-sqrt(T/(2*ρ*A))] # 固定坐标系诱导速度初值
+    vind_s = [0.0,0.0,-sqrt(abs(T/(2*ρ*A)))] # 固定坐标系诱导速度初值
     vall_s = v_air + vind_s # 固定坐标系总的滑流速度初值
     # lmdaui = -T/(2*ρ*A*norm(vall_s))/(Ω*R) # 前飞均匀诱导速度系数
     vindui_s = [0.0,0.0,-T/(2*ρ*A*norm(vall_s))]  # 第一步迭代的固定坐标系均匀入流值
@@ -18,17 +18,27 @@
     end
     lmdaui = vindui_s[3]/(Ω*R) # 收敛前飞均匀诱导速度系数
 
-	return lmdaui, vall_s
+    vdiskind = Array{Vector}(npsi, Nbe)
+    for i in 1:npsi
+    	for j in 1:Nbe
+    		vdiskind[i,j] = vall_s
+    	end
+    end
+
+	return lmdaui, vall_s, vdiskind
 end
 
-@everywhere function vallr(vall_s, ψ, β, dβ, rb)
-    vall_r = Array{Vector}(Nb,Nbe)
-    for k in 1:Nb # 叶素当地来流速度（包含诱导速度、前方来流、挥舞流动以及旋转来流）
-        ψ = ψ+(k-1)*2*π/Nb
-        for i in 1:Nbe
-            vall_r[k,i] = (systoro(vall_s, ψ)+[0.0,-Ω*rb[k,i],0.0]+
-                            betatoro([0,0,dβ*rb[k,i]],β))
+@everywhere function vbeui(vall_s, β, dβ, rb, rotor=1)
+    # 叶素当地位于旋转坐标系中的速度
+
+    vall_r = Array{Vector}(npsi,Nbe)
+    for i in 1:npsi
+        ψ = (-1)^(rotor-1)*(i-1)*dψ
+        for j in 1:Nbe
+            vall_r[i,j] = (systoro(vall_s, ψ)+[0.0,(-1)^rotor*Ω*rb[j],0.0]+
+                            betatoro([0,0,dβ[i]*rb[j]],β[i]))
         end
     end
+
     return vall_r
 end
