@@ -31,6 +31,13 @@
         ddβ[i] = (-βlon*cos(ψ)+βlat*sin(ψ))*Ω^2
     end
 
+    x = 1:npsi+1
+    bplot = plot(x, β, label = "Beta")
+    dbplot = plot(x, dβ, label = "dBeta")
+    ddbplot = plot(x, ddβ, label = "ddBeta")
+    flapplot = plot(bplot, dbplot, ddbplot, layout = (3,1))
+    display(flapplot)
+
     β1   = β[Int64(1)]
     β2   = β[Int64(npsi/4)]
     β3   = β[Int64(npsi/2)]
@@ -60,33 +67,56 @@ end
         # vber = vbe(vind, β, dβ)
         α  = aoaget(vber, β, θ, rotor)
 
-        # Runge Kutta 4th order method
+        # Johnson 简化方法
         for i in 1:npsi
             t = (i-1)*dt
-            # ddβ[i] = ddbeta(β[i], t, dt)
-            f1 = ddbeta(β[i], t, dt, vber[i,:], chord, α[i,:], ddβ[i], θ[i,:], dr, rb)
-            f2 = ddbeta(β[i]+1/2*dt*dβ[i]+1/8*dt^2*f1, t+1/2*dt, dt, vber[i,:], chord, α[i,:], ddβ[i], θ[i,:], dr, rb)
-            f3 = ddbeta(β[i]+1/2*dt*dβ[i]+1/8*dt^2*f2, t+1/2*dt, dt, vber[i,:], chord, α[i,:], ddβ[i], θ[i,:], dr, rb)
-            f4 = ddbeta(β[i]+dt*dβ[i]+1/2*dt^2*f3, dt, t+dt, vber[i,:], chord, α[i,:], ddβ[i], θ[i,:], dr, rb)
-            β[i+1] = β[i]+dt*(dβ[i]+dt/6*(f1+f2+f3))
-            dβ[i+1] = dβ[i]+dt/6*(f1+2*f2+2*f3+f4)
-            ddβ[i+1] = f1
+            dβ[i+1] = dβ[i]+ddβ[i]*dt
+            β[i+1] = β[i]+dβ[i+1]*dt
+            ddβ[i+1] = i<npsi ?
+                ddbeta(β[i+1], t, dt, vber[i+1,:], chord, α[i+1,:], ddβ[i], θ[i+1,:], dr, rb) :
+                ddbeta(β[i+1], t, dt, vber[1,:], chord, α[1,:], ddβ[i], θ[1,:], dr, rb)
         end
+
+        # # Runge Kutta 4th order method
+        # for i in 1:npsi
+        #     t = (i-1)*dt
+        #     # ddβ[i] = ddbeta(β[i], t, dt)
+        #     f1 = ddbeta(β[i], t, dt, vber[i,:], chord, α[i,:], ddβ[i], θ[i,:], dr, rb)
+        #     f2 = ddbeta(β[i]+1/2*dt*dβ[i]+1/8*dt^2*f1, t+1/2*dt, dt, vber[i,:], chord, α[i,:], ddβ[i], θ[i,:], dr, rb)
+        #     f3 = ddbeta(β[i]+1/2*dt*dβ[i]+1/8*dt^2*f2, t+1/2*dt, dt, vber[i,:], chord, α[i,:], ddβ[i], θ[i,:], dr, rb)
+        #     f4 = ddbeta(β[i]+dt*dβ[i]+1/2*dt^2*f3, dt, t+dt, vber[i,:], chord, α[i,:], ddβ[i], θ[i,:], dr, rb)
+        #     β[i+1] = β[i]+dt*(dβ[i]+dt/6*(f1+f2+f3))
+        #     dβ[i+1] = dβ[i]+dt/6*(f1+2*f2+2*f3+f4)
+        #     ddβ[i+1] = i<npsi ?
+        #         ddbeta(β[i+1], t, dt, vber[i+1,:], chord, α[i+1,:], ddβ[i], θ[i+1,:], dr, rb) :
+        #         ddbeta(β[i+1], t, dt, vber[1,:], chord, α[1,:], ddβ[i], θ[1,:], dr, rb)
+        # end
+
         # print("=== β is $(β) ===\n
         # === dβ is $(dβ) ===\n
         # === ddβ is $(ddβ) ===\n\n")
-        #
+
         β[1] 	= (β[1]+β[npsi+1])/2
         dβ[1]	= (dβ[1]+dβ[npsi+1])/2
         ddβ[1]	= (ddβ[1]+ddβ[npsi+1])/2
 
         # judge if flap converaged
-        rmsβ = abs(β[1]-β[npsi+1]) +abs(dβ[1]-dβ[npsi+1])+
-                    abs(ddβ[1]-ddβ[npsi+1])
+        rmsβ = abs(β[1]-β[npsi+1])  +abs(dβ[1]-dβ[npsi+1])
+                     +abs(ddβ[1]-ddβ[npsi+1])
         # print("+++++++++++++++++++++++++++++++++++\n")
         # print("+++++++++ rmsβ is $(rmsβ) +++++++++\n")
         # print("+++++++++++++++++++++++++++++++++++\n")
         push!(rmsbeta, rmsβ)
+
+        x = 1:npsi+1
+        y = 1:length(rmsbeta)
+        bplot = plot(x, β, label = "Beta")
+        dbplot = plot(x, dβ, label = "dBeta")
+        ddbplot = plot(x, ddβ, label = "ddBeta")
+        rmsplot = plot(y, rmsbeta, label = "RMS")
+        flapplot = plot(bplot, dbplot, ddbplot, rmsplot, layout = (2,2))
+        display(flapplot)
+
         if rmsβ<1e-1
             # print("%%%%%%%%%%%%%%%%%CONVERAGED%%%%%%%%%%%%%%%%\n")
             break

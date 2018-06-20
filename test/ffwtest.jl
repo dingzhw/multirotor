@@ -21,7 +21,7 @@ include(pwd()*"//src//ffw_sl.jl")
 include(pwd()*"//src//ffw_tr.jl")
 include(pwd()*"//src//ffw_ga.jl")
 
-# trresult = trfm(19.0/57.3, 0., 0., sol_ffw, ntiter)
+tic();trresult = trfm(19.0/57.3, 0., 0., sol_ffw, ntiter);toc()
 
 # # 变量初始化
 # θcp = 18.0*π/180

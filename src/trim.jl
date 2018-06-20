@@ -20,7 +20,7 @@
             end
         end
 
-        if abs(res[1])<=5 && abs(res[2])<=2e-2 && abs(res[3])<=2e-2
+        if abs(res[1])<=1 && abs(res[2])<=2e-2 && abs(res[3])<=2e-2
             print("Trim Succeeded!\n")
             return soltmp, θcp, θ_lat, θ_lon, optmp
             break
@@ -51,7 +51,7 @@
                     θ_lon = -π/2+π*rand()
                 end
 
-                # # 配平加速方法
+                # # 配平稳定收敛方法
                 # itrim = 1
                 # while itrim<=10
                 #     # trim acceleration

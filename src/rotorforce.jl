@@ -62,6 +62,7 @@ end
     fy_s = 0.0
     fz_s = 0.0
     MQ   = 0.0
+    frec = Float64[]
 
     # vber = vbe(vind, β, dβ)
     θ  = theget(θ0, θ_lat, θ_lon, rotor)
@@ -73,12 +74,17 @@ end
         # print("\n============\n")
         ψ = (-1)^(rotor-1)*(i-1)*dψ
         fblade = bladeaero(vber[i,:], chord, α[i,:], β[i], ddβ[i], θ[i,:], dr, rb, rotor)
+        push!(frec, fblade[2])
         fy_r += fblade[1]
         fz_r += fblade[2]
         fx_s += -fy_r*sin(ψ)
         fy_s += fy_r*cos(ψ)
         MQ   += fblade[3]
     end
+
+    x = 1:npsi
+    fplot = plot(x, frec, title="force change with azimuth", xlabel="Azimuth Angle", ylabel="Lift")
+    display(fplot)
 
     fy_r = fy_r/npsi*Nb
     fz_r = fz_r/npsi*Nb

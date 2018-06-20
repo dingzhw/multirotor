@@ -82,6 +82,16 @@ end
         # print("+++++++++ rmsβ is $(rmsβ) +++++++++\n")
         # print("+++++++++++++++++++++++++++++++++++\n")
         push!(rmsbeta, rmsβ)
+
+        x = 1:npsi+1
+        y = 1:length(rmsbeta)
+        bplot = plot(x, β, label = "Beta")
+        dbplot = plot(x, dβ, label = "dBeta")
+        ddbplot = plot(x, ddβ, label = "ddBeta")
+        rmsplot = plot(y, rmsbeta, label = "RMS")
+        flapplot = plot(bplot, dbplot, ddbplot, rmsplot, layout = (2,2))
+        display(flapplot)
+
         if rmsβ<1e-1
             # print("%%%%%%%%%%%%%%%%%CONVERAGED%%%%%%%%%%%%%%%%\n")
             break
