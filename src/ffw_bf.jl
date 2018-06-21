@@ -26,6 +26,13 @@
         ddβ[i] = (-βlon*cos(ψ)+βlat*sin(ψ))*Ω^2
     end
 
+    x = 1:npsi+1
+    bplot = plot(x, β, label = "Beta")
+    dbplot = plot(x, dβ, label = "dBeta")
+    ddbplot = plot(x, ddβ, label = "ddBeta")
+    flapplot = plot(bplot, dbplot, ddbplot, layout = (3,1))
+    display(flapplot)
+
     β1   = β[Int64(1)]
     β2   = β[Int64(npsi/4)]
     β3   = β[Int64(npsi/2)]
@@ -55,6 +62,16 @@ end
         # vber = vbe(vind, β, dβ)
         α  = aoaget(vber, β, θ, rotor)
 
+        # # Johnson 简化方法
+        # for i in 1:npsi
+        #     t = (i-1)*dt
+        #     dβ[i+1] = dβ[i]+(ddβ[i+1]-dβ[i])/2*dt
+        #     β[i+1] = β[i]+(dβ[i+1]-dβ[i])/2*dt
+        #     ddβ[i+1] = i<npsi ?
+        #         ddbeta(β[i+1], t, dt, vber[i+1,:], chord, α[i+1,:], ddβ[i], θ[i+1,:], dr, rb) :
+        #         ddbeta(β[i+1], t, dt, vber[1,:], chord, α[1,:], ddβ[i], θ[1,:], dr, rb)
+        # end
+
         # Runge Kutta 4th order method
         for i in 1:npsi
             t = (i-1)*dt
@@ -65,8 +82,11 @@ end
             f4 = ddbeta(β[i]+dt*dβ[i]+1/2*dt^2*f3, dt, t+dt, vber[i,:], chord, α[i,:], ddβ[i], θ[i,:], dr, rb)
             β[i+1] = β[i]+dt*(dβ[i]+dt/6*(f1+f2+f3))
             dβ[i+1] = dβ[i]+dt/6*(f1+2*f2+2*f3+f4)
-            ddβ[i+1] = f1
+            ddβ[i+1] = i<npsi ?
+                ddbeta(β[i+1], t, dt, vber[i+1,:], chord, α[i+1,:], ddβ[i], θ[i+1,:], dr, rb) :
+                ddbeta(β[i+1], t, dt, vber[1,:], chord, α[1,:], ddβ[i], θ[1,:], dr, rb)
         end
+
         # print("=== β is $(β) ===\n
         # === dβ is $(dβ) ===\n
         # === ddβ is $(ddβ) ===\n\n")

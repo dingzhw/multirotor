@@ -83,8 +83,8 @@ end
     end
 
     x = 1:npsi
-    fplot = plot(x, frec, title="force change with azimuth", xlabel="Azimuth Angle", ylabel="Lift")
-    display(fplot)
+    plot(x, frec, title="force change with azimuth", xlabel="Azimuth Angle", ylabel="Lift")
+    # display(fplot)
 
     fy_r = fy_r/npsi*Nb
     fz_r = fz_r/npsi*Nb

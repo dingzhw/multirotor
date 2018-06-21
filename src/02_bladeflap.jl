@@ -67,30 +67,30 @@ end
         # vber = vbe(vind, β, dβ)
         α  = aoaget(vber, β, θ, rotor)
 
-        # Johnson 简化方法
-        for i in 1:npsi
-            t = (i-1)*dt
-            dβ[i+1] = dβ[i]+ddβ[i]*dt
-            β[i+1] = β[i]+dβ[i+1]*dt
-            ddβ[i+1] = i<npsi ?
-                ddbeta(β[i+1], t, dt, vber[i+1,:], chord, α[i+1,:], ddβ[i], θ[i+1,:], dr, rb) :
-                ddbeta(β[i+1], t, dt, vber[1,:], chord, α[1,:], ddβ[i], θ[1,:], dr, rb)
-        end
-
-        # # Runge Kutta 4th order method
+        # # Johnson 简化方法
         # for i in 1:npsi
         #     t = (i-1)*dt
-        #     # ddβ[i] = ddbeta(β[i], t, dt)
-        #     f1 = ddbeta(β[i], t, dt, vber[i,:], chord, α[i,:], ddβ[i], θ[i,:], dr, rb)
-        #     f2 = ddbeta(β[i]+1/2*dt*dβ[i]+1/8*dt^2*f1, t+1/2*dt, dt, vber[i,:], chord, α[i,:], ddβ[i], θ[i,:], dr, rb)
-        #     f3 = ddbeta(β[i]+1/2*dt*dβ[i]+1/8*dt^2*f2, t+1/2*dt, dt, vber[i,:], chord, α[i,:], ddβ[i], θ[i,:], dr, rb)
-        #     f4 = ddbeta(β[i]+dt*dβ[i]+1/2*dt^2*f3, dt, t+dt, vber[i,:], chord, α[i,:], ddβ[i], θ[i,:], dr, rb)
-        #     β[i+1] = β[i]+dt*(dβ[i]+dt/6*(f1+f2+f3))
-        #     dβ[i+1] = dβ[i]+dt/6*(f1+2*f2+2*f3+f4)
+        #     dβ[i+1] = dβ[i]+(ddβ[i+1]-dβ[i])/2*dt
+        #     β[i+1] = β[i]+(dβ[i+1]-dβ[i])/2*dt
         #     ddβ[i+1] = i<npsi ?
         #         ddbeta(β[i+1], t, dt, vber[i+1,:], chord, α[i+1,:], ddβ[i], θ[i+1,:], dr, rb) :
         #         ddbeta(β[i+1], t, dt, vber[1,:], chord, α[1,:], ddβ[i], θ[1,:], dr, rb)
         # end
+
+        # Runge Kutta 4th order method
+        for i in 1:npsi
+            t = (i-1)*dt
+            # ddβ[i] = ddbeta(β[i], t, dt)
+            f1 = ddbeta(β[i], t, dt, vber[i,:], chord, α[i,:], ddβ[i], θ[i,:], dr, rb)
+            f2 = ddbeta(β[i]+1/2*dt*dβ[i]+1/8*dt^2*f1, t+1/2*dt, dt, vber[i,:], chord, α[i,:], ddβ[i], θ[i,:], dr, rb)
+            f3 = ddbeta(β[i]+1/2*dt*dβ[i]+1/8*dt^2*f2, t+1/2*dt, dt, vber[i,:], chord, α[i,:], ddβ[i], θ[i,:], dr, rb)
+            f4 = ddbeta(β[i]+dt*dβ[i]+1/2*dt^2*f3, dt, t+dt, vber[i,:], chord, α[i,:], ddβ[i], θ[i,:], dr, rb)
+            β[i+1] = β[i]+dt*(dβ[i]+dt/6*(f1+f2+f3))
+            dβ[i+1] = dβ[i]+dt/6*(f1+2*f2+2*f3+f4)
+            ddβ[i+1] = i<npsi ?
+                ddbeta(β[i+1], t, dt, vber[i+1,:], chord, α[i+1,:], ddβ[i], θ[i+1,:], dr, rb) :
+                ddbeta(β[i+1], t, dt, vber[1,:], chord, α[1,:], ddβ[i], θ[1,:], dr, rb)
+        end
 
         # print("=== β is $(β) ===\n
         # === dβ is $(dβ) ===\n
@@ -117,7 +117,7 @@ end
         flapplot = plot(bplot, dbplot, ddbplot, rmsplot, layout = (2,2))
         display(flapplot)
 
-        if rmsβ<1e-1
+        if rmsβ<1e-3
             # print("%%%%%%%%%%%%%%%%%CONVERAGED%%%%%%%%%%%%%%%%\n")
             break
         end
@@ -136,6 +136,14 @@ end
 
     return true, β, dβ, ddβ, β0, βlon, βlat, rmsbeta
 end
+
+# @everywhere function ddbeta(β, t, dt, vber, α, θ, ddβ, chord, dr, rb)
+#     Maero = bladeaero(vber, chord, α, β, ddβ, θ, dr, rb)[4]
+#     ddbeta = Maero/Iβ-Ω^2*cos(β)*sin(β)
+#     # ddbeta = Maero/Iβ-Ω^2*β
+#
+#     return ddbeta
+# end
 
 @everywhere function ddbeta(β, t, dt, vber, α, θ, ddβ, chord, dr, rb)
     Maero = bladeaero(vber, chord, α, β, ddβ, θ, dr, rb)[4]

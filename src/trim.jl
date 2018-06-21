@@ -22,7 +22,7 @@
 
         if abs(res[1])<=1 && abs(res[2])<=2e-2 && abs(res[3])<=2e-2
             print("Trim Succeeded!\n")
-            return soltmp, θcp, θ_lat, θ_lon, optmp
+            return soltmp, θcp, θ_lat, θ_lon # , optmp
             break
         else
             # print("+++++++++++++++++++++++++= test line = ++++++++++++++\n\n\n")
