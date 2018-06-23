@@ -26,7 +26,7 @@
             end
         end
 
-        if abs(res[1])<=10 && abs(res[2])<=1 && mean(abs.(res[3:6]))<=1e-2
+        if abs(res[1])<=1 && abs(res[2])<=1 && mean(abs.(res[3:6]))<=1e-2
             print("Trim Succeeded!\n")
             return soltmp, θtdm
             break
@@ -57,7 +57,7 @@
     end
 end
 
-@everywhere function ntiter(θtdm, solf::Function, ϵ=0.5*π/180)
+@everywhere function ntiter(θtdm, solf::Function, ϵ=0.1*π/180)
 	# Newton iteration method
 
 	θtdm1 = θtdm[1:3] # 旋翼 1 操纵量
