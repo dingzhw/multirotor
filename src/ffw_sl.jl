@@ -111,26 +111,26 @@
         vbertmp = vbe(vdiskind, β, dβ, rb)
         vber    = vbertmp[1]
 
-        # calculate the blade flap using 精细数值方法
-        bftmp = bladeflap(β, dβ, ddβ, vber, chord, θ0, θ_lat, θ_lon, dr, rb)
-        if bftmp[1]   # judge if the flap iteration converaged
-            β    = bftmp[2]
-            dβ   = bftmp[3]
-            ddβ  = bftmp[4]
-            β0   = bftmp[5]
-            βlon = bftmp[6]
-            βlat = bftmp[7]
-        end
+        # # calculate the blade flap using 精细数值方法
+        # bftmp = bladeflap(β, dβ, ddβ, vber, chord, θ0, θ_lat, θ_lon, dr, rb)
+        # if bftmp[1]   # judge if the flap iteration converaged
+        #     β    = bftmp[2]
+        #     dβ   = bftmp[3]
+        #     ddβ  = bftmp[4]
+        #     β0   = bftmp[5]
+        #     βlon = bftmp[6]
+        #     βlat = bftmp[7]
+        # end
 
         # 使用经验公式求解挥舞
         vind_ = mean(vdiskind)[3]/(Ω*R)
-        # βtmp = staticbf(θ75, (twist1+twist2), θ_lon, θ_lat, μ_air, abs.(λ_air+vind_))
-        # β = βtmp[1]
-        # dβ = βtmp[2]
-        # ddβ = βtmp[3]
-        # β0 = βtmp[4]
-        # βlon = βtmp[5]
-        # βlat = βtmp[6]
+        βtmp = staticbf(θ75, (twist1+twist2), θ_lon, θ_lat, μ_air, abs.(λ_air+vind_))
+        β = βtmp[1]
+        dβ = βtmp[2]
+        ddβ = βtmp[3]
+        β0 = βtmp[4]
+        βlon = βtmp[5]
+        βlat = βtmp[6]
 
         # calculate force, moment and power
         rftmp = rotoraero(vber, chord, β, dβ, ddβ, θ0, θ_lat, θ_lon, dr, rb)

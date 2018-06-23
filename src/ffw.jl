@@ -7,11 +7,23 @@
 
 ################################################################################
 
+# @everywhere function gamget(T)
+#     # 另一种求解近似涡环环量的思路
+#
+#     dτ = 2*π/Ω # time for one rev.
+#     if T>=0
+#         return -2*T/(ρ*Vtip*A*σ), dτ
+#     else
+#         return 2*T/(ρ*Vtip*A*σ), dτ
+#     end
+# end
+
 @everywhere function gamget(T, kΓ=1.2, vrnum=4)
     # Calculation of Γ of vortex ring
     # Γ of vortex ring is calculate at the instant of its release
     vad = sqrt(abs(T)/Nro/(2*ρ*A))
-    kp  = R/(vad+abs(vair*sin(αs)))
+    # kp  = R/(vad+abs(vair*sin(αs)))
+    kp  = R/(vad+abs(vair))
     dτ  = kp/vrnum
     if T>=0
         return -4*kΓ*kp*T/(ρ*Vtip*A*σ), dτ

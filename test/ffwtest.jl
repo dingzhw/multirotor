@@ -23,6 +23,7 @@ include(pwd()*"//src//ffw_tr.jl")
 
 using Plots;gr()
 tic();
-trresult = trfm( 0.35371398448316366, 0.010398093373873027, -0.04081833065142815, sol_ffw, ntiter)
+trresult = trfm( 0.3, 0, 0, sol_ffw, ntiter)
+show(trresult)
 
 toc(); # at this points the project runs out
