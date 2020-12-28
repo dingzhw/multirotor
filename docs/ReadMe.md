@@ -1,5 +1,10 @@
 # Aerodnamics Characteristics Calculation of MultiRotors Using Various Models
 ---
+
+> 注意：本代码目前处于“中断”状态，而且没有经过任何测试和验证，仅供参考，慎用！！！
+> 注意：2020年12月28日，13点51分，已经寻找到了更合适的方法实现直升机风洞配平和飞行配平，但是由于项目工作压力太大，暂时不会更新本代码！
+> 注意：何时恢复对代码的更新和维护？——未知，有生之年校😂
+
 ## Rotor Parameters Moudle
 
 ## Uniform Inflow Moudle
